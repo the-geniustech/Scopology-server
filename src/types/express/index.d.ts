@@ -1,4 +1,4 @@
-import { IUserDocument } from "../../src/interfaces/user.interface";
+import { IUserDocument } from "@interfaces/user.interface";
 
 declare global {
   namespace Express {
