@@ -10,6 +10,7 @@ const envSchema = z.object({
   MONGO_URI: z.string().url(),
   JWT_SECRET: z.string().min(10),
   JWT_EXPIRES_IN: z.string(),
+  CLIENT_APP_URL: z.string().url(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

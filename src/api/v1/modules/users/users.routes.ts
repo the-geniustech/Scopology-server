@@ -19,7 +19,7 @@ router
   .post(
     restrictedTo(UserRole.ADMINISTRATOR),
     validateUserCreate,
-    UserController.registerUser
+    UserController.inviteUser
   );
 
 router.get(
