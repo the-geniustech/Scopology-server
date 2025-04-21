@@ -2,33 +2,27 @@ import { Request, Response, NextFunction } from "express";
 import * as UserService from "./users.service";
 import { catchAsync } from "@utils/catchAsync";
 import { sendSuccess } from "@utils/responseHandler";
-import AppError from "../../../../utils/appError";
+import AppError from "@utils/appError";
+import { APIFeatures } from "@utils/apiFeatures.util";
+import User from "@models/User.model";
+import { buildSearchQuery } from "../utils/search.util";
+import {
+  getNextSequenceIdPreview,
+  incrementSequenceId,
+} from "@models/sequentialIdGenerator.util";
+import { idFormatConfig } from "@constants/idPrefixes";
 
-export const previewNextUserId = catchAsync(async (_req, res) => {
-  const nextId = await UserService.getNextUserIdPreview();
+const sequenceOptions = idFormatConfig["User"];
 
-  return sendSuccess({
-    res,
-    message: "Next available userId (preview)",
-    data: { nextUserId: nextId },
-  });
-});
-
-/**
- * Register a new user
- */
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
-  // Step 1: preview current userId
-  const nextUserId = await UserService.getNextUserIdPreview();
+  const nextUserId = await getNextSequenceIdPreview("User", sequenceOptions);
 
-  // Step 2: attach it to the user being created
   const user = await UserService.createUser({
     ...req.body,
     userId: nextUserId,
   });
 
-  // Step 3: commit to incrementing the counter
-  await UserService.incrementUserIdCounter();
+  await incrementSequenceId("User", sequenceOptions);
 
   return sendSuccess({
     res,
@@ -38,16 +32,55 @@ export const registerUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const previewNextUserId = catchAsync(async (_req, res) => {
+  const nextId = await getNextSequenceIdPreview("User", sequenceOptions);
+
+  return sendSuccess({
+    res,
+    message: "Next available userId (preview)",
+    data: { nextUserId: nextId },
+  });
+});
+
 /**
  * Get all users
  */
-export const getAllUsers = catchAsync(async (_req: Request, res: Response) => {
-  const users = await UserService.getAllUsers();
+export const getAllUsers = catchAsync(async (req, res) => {
+  const baseUrl = `${req.baseUrl}${req.path}`;
+  const features = new APIFeatures(User.find({ deletedAt: null }), req.query);
+  const { data, pagination } = await features.applyAllFiltersWithPaginationMeta(
+    baseUrl
+  );
+
+  return res.status(200).json({
+    status: "success",
+    message: "Users retrieved successfully",
+    pagination,
+    results: data.length,
+    data,
+  });
+});
+
+export const searchUsers = catchAsync(async (req: Request, res: Response) => {
+  const keyword = req.query.q as string;
+
+  if (!keyword || keyword.trim().length < 2) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Search query must be at least 2 characters",
+    });
+  }
+
+  const query = buildSearchQuery(keyword, ["fullName", "email", "phoneNumber"]);
+  const users = await User.find({ deletedAt: null, ...query }).select(
+    "userId fullName email phoneNumber roles"
+  );
+
   return sendSuccess({
     res,
-    message: "Users fetched successfully",
-    data: users,
+    message: "User search results",
     results: users.length,
+    data: users,
   });
 });
 

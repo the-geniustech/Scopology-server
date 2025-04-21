@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as UserController from "./users.controller";
 import { validateUserCreate, validateUserUpdate } from "./users.validator";
 import { protect, restrictedTo } from "@middlewares/auth.middleware";
+import { UserRole } from "@constants/roles";
 
 const router = Router();
 
@@ -14,34 +15,45 @@ router.use(protect);
 // 🔐 Only administrators can manage users
 router
   .route("/")
-  .get(restrictedTo("administrator"), UserController.getAllUsers)
+  .get(restrictedTo(UserRole.ADMINISTRATOR), UserController.getAllUsers)
   .post(
-    restrictedTo("administrator"),
+    restrictedTo(UserRole.ADMINISTRATOR),
     validateUserCreate,
     UserController.registerUser
   );
 
+router.get(
+  "/search",
+  protect,
+  restrictedTo(UserRole.ADMINISTRATOR, UserRole.SUPERVISOR),
+  UserController.searchUsers
+);
+
 // 🧠 Specific fetch operations (can be shared across roles)
 router.get(
   "/email/:email",
-  restrictedTo("administrator", "supervisor"),
+  restrictedTo(UserRole.ADMINISTRATOR, UserRole.SUPERVISOR),
   UserController.getUserByEmail
 );
 
 router.get(
-  "/:userId(\\d+)",
-  restrictedTo("administrator", "supervisor"),
+  "/:userId",
+  restrictedTo(UserRole.ADMINISTRATOR, UserRole.SUPERVISOR),
   UserController.getUserByUserId
 );
 
 // 🛠️ Update and delete require administrator permissions
 router.patch(
   "/:id",
-  restrictedTo("administrator"),
+  restrictedTo(UserRole.ADMINISTRATOR),
   validateUserUpdate,
   UserController.updateUser
 );
 
-router.delete("/:id", restrictedTo("administrator"), UserController.deleteUser);
+router.delete(
+  "/:id",
+  restrictedTo(UserRole.ADMINISTRATOR),
+  UserController.deleteUser
+);
 
 export default router;

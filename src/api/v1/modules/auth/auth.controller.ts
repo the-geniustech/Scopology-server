@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "./auth.service";
+import { catchAsync } from "@utils/catchAsync";
 
-export const registerUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const registerUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const { user, token } = await AuthService.register(req.body);
 
     res.status(201).json({
@@ -17,10 +14,8 @@ export const registerUser = async (
         token,
       },
     });
-  } catch (error) {
-    next(error);
   }
-};
+);
 
 export const loginUser = async (
   req: Request,

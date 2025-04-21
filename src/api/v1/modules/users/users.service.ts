@@ -3,6 +3,8 @@ import { IUserDocument } from "../../../../interfaces/user.interface";
 import { FilterQuery, UpdateQuery } from "mongoose";
 
 import { Counter } from "../../../../models/Counter.model";
+import { APIFeatures } from "@utils/apiFeatures.util";
+import QueryString from "qs";
 
 /**
  * Gets the next available userId without incrementing
@@ -34,13 +36,6 @@ export const createUser = async (
 ): Promise<IUserDocument> => {
   const user = new User(data);
   return await user.save();
-};
-
-/**
- * Returns all active users.
- */
-export const getAllUsers = async (): Promise<IUserDocument[]> => {
-  return await User.find({ deletedAt: null }).select("-password");
 };
 
 /**

@@ -1,12 +1,11 @@
-import mongoose, { Schema, model } from "mongoose";
-import { IUserDocument } from "../interfaces/user.interface";
+import { Schema, model } from "mongoose";
+import { IUserDocument } from "@interfaces/user.interface";
 import bcrypt from "bcrypt";
-import { Counter } from "./Counter.model";
 
 const userSchema = new Schema<IUserDocument>(
   {
     userId: {
-      type: Number,
+      type: String,
       unique: true,
       required: true,
     },
@@ -22,11 +21,6 @@ const userSchema = new Schema<IUserDocument>(
       lowercase: true,
       trim: true,
     },
-    phoneNumber: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
     password: {
       type: String,
       required: true,
@@ -38,9 +32,18 @@ const userSchema = new Schema<IUserDocument>(
       enum: ["administrator", "supervisor"],
       default: ["supervisor"],
     },
+    status: {
+      type: String,
+      enum: ["pending", "active", "disabled"],
+      default: "pending",
+    },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    dateJoined: {
+      type: Date,
+      default: null,
     },
     lastLogin: {
       type: Date,
@@ -55,24 +58,6 @@ const userSchema = new Schema<IUserDocument>(
     versionKey: false,
   }
 );
-
-// (async () => {
-//   await Counter.create({ _id: "User" });
-// })();
-
-// Pre-save to generate auto-increment userId
-userSchema.pre<IUserDocument>("save", async function (next) {
-  if (this.isNew) {
-    const counter = await Counter.findByIdAndUpdate(
-      "User",
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    console.log("Counter:", counter);
-
-    this.userId = counter!.seq;
-  }
-});
 
 // 🔐 Password Hashing Middleware
 userSchema.pre<IUserDocument>("save", async function (next) {

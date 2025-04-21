@@ -1,13 +1,14 @@
 import { Document } from "mongoose";
 
 export interface IUserDocument extends Document {
-  userId: number;
+  userId: string;
   fullName: string;
   email: string;
-  phoneNumber?: string;
   password: string;
   roles: ("administrator" | "supervisor")[];
+  status: "pending" | "active" | "disabled";
   isActive: boolean;
+  dateJoined: Date | null;
   lastLogin?: Date;
   deletedAt?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;

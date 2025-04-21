@@ -91,8 +91,8 @@ const errorHandler = (
   err.status = err.status || "error";
 
   let error = Object.create(err);
-  error.message = err.message;
-  error.name = err.name;
+  if (!error.message) error.message = err.message;
+  if (!error.name) error.name = err.name;
 
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, req, res);

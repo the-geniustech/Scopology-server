@@ -1,5 +1,3 @@
-// src/utils/responseHandler.ts
-
 import { Response } from "express";
 
 type SuccessResponseOptions<T> = {
