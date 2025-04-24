@@ -9,9 +9,6 @@ interface TokenPayload extends JwtPayload {
   [key: string]: any;
 }
 
-/**
- * Sign a JWT token with custom payload and optional expiration
- */
 export const signToken = (
   payload: TokenPayload,
   options: SignOptions = {}
@@ -22,9 +19,6 @@ export const signToken = (
   });
 };
 
-/**
- * Verify and decode a JWT token. Throws AppError if invalid.
- */
 export const verifyToken = (token: string): TokenPayload => {
   try {
     return jwt.verify(token, env.JWT_SECRET!) as TokenPayload;

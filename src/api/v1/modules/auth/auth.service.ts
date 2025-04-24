@@ -55,7 +55,6 @@ export const login = async (
   const isMatch = await user.comparePassword(password);
   if (!isMatch) throw new AppError("Invalid email or password", 401);
 
-  // Optional: Prevent disabled users from logging in
   if (user.status !== "active") {
     if (user.status === "pending") {
       throw new AppError("Your account is not yet activated.", 403);

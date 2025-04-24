@@ -7,27 +7,10 @@ import { setAccessTokenCookie, signToken } from "@utils/token.util";
 import { env } from "@config/env";
 import AppError from "@utils/appError";
 
-// Temporary/test function to signup a user
-export const registerUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { user, token } = await AuthService.register(req.body);
-
-    res.status(201).json({
-      status: "success",
-      message: "User registered successfully",
-      data: {
-        user,
-        token,
-      },
-    });
-  }
-);
-
 export const signupSuperAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { fullName, email, password, setupSecret } = req.body;
 
-    // ❌ Allow only in development/staging (optional, skip in prod init tools)
     if (env.NODE_ENV !== "development") {
       return next(
         new AppError(
@@ -37,7 +20,6 @@ export const signupSuperAdmin = catchAsync(
       );
     }
 
-    // 🔐 Require special setup secret to validate access
     if (setupSecret !== env.SUPERADMIN_SETUP_SECRET) {
       return next(new AppError("Invalid setup secret.", 401));
     }

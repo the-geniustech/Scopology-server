@@ -20,7 +20,6 @@ router.post(
 );
 
 router.post("/login", validateLogin, authController.login);
-router.post("/add-user", authController.registerUser);
 
 router.post(
   "/invite",
