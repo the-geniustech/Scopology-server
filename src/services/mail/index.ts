@@ -1,4 +1,4 @@
-import { EmailPayload } from "./mail.interface";
+import { EmailPayload } from "@interfaces/mail.interface";
 import { createMailer } from "./mailer.factory";
 
 export const sendEmail = async (payload: EmailPayload): Promise<void> => {

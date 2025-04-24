@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
-import { EmailProvider, EmailPayload } from "../mail.interface";
+import {
+  EmailProvider,
+  EmailPayload,
+} from "../../../interfaces/mail.interface";
 import dotenv from "dotenv";
 
 dotenv.config();

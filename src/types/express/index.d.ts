@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import { IUserDocument } from "@interfaces/user.interface";
 
 declare global {
@@ -7,3 +8,9 @@ declare global {
     }
   }
 }
+
+type AsyncHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<any>;

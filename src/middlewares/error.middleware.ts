@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import AppError from "../utils/appError";
-import logger from "../config/logger";
+import AppError from "@utils/appError";
+import logger from "@config/logger";
 
 dotenv.config();
 
@@ -15,18 +15,12 @@ const handleCastErrorDB = (err: mongoose.Error.CastError): AppError => {
   return new AppError(message, 400);
 };
 
-/**
- * Handle MongoDB Duplicate Key Error
- */
 const handleDuplicateFieldsDB = (err: any): AppError => {
   const value = err.keyValue ? Object.values(err.keyValue).join(", ") : "";
   const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 409);
 };
 
-/**
- * Handle Mongoose Validation Errors
- */
 const handleValidationErrorDB = (
   err: mongoose.Error.ValidationError
 ): AppError => {
@@ -35,21 +29,12 @@ const handleValidationErrorDB = (
   return new AppError(message, 400);
 };
 
-/**
- * Handle Invalid JWT
- */
 const handleJWTError = (): AppError =>
   new AppError("Invalid token. Please log in again!", 401);
 
-/**
- * Handle Expired JWT
- */
 const handleJWTExpiredError = (): AppError =>
   new AppError("Your token has expired! Please log in again.", 401);
 
-/**
- * Dev error response
- */
 const sendErrorDev = (err: any, req: Request, res: Response): Response => {
   logger.error(`💥 ${err.stack}`);
   return res.status(err.statusCode || 500).json({
@@ -60,12 +45,9 @@ const sendErrorDev = (err: any, req: Request, res: Response): Response => {
   });
 };
 
-/**
- * Production error response
- */
 const sendErrorProd = (err: any, req: Request, res: Response): Response => {
   if (err.isOperational) {
-    return (err.statusCode || 500).json({
+    return res.status(err.statusCode || 500).json({
       status: err.status,
       message: err.message,
     });
@@ -78,9 +60,6 @@ const sendErrorProd = (err: any, req: Request, res: Response): Response => {
   });
 };
 
-/**
- * Global Error Handler Middleware
- */
 const errorHandler = (
   err: any,
   req: Request,

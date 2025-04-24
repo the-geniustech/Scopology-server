@@ -1,4 +1,4 @@
-import "dotenv/config"; // Loads environment variables from .env
+import "dotenv/config";
 import mongoose from "mongoose";
 import app from "./app";
 import { connectDB } from "./config/database";
@@ -6,10 +6,9 @@ import logger from "./config/logger";
 
 const PORT = process.env.PORT || 5000;
 
-// Start server only after successful DB connection
 const startServer = async () => {
   try {
-    await connectDB(); // MongoDB connection
+    await connectDB();
 
     const server = app.listen(PORT, () => {
       logger.info(
@@ -17,7 +16,6 @@ const startServer = async () => {
       );
     });
 
-    // Graceful Shutdown
     const shutdown = (signal: string) => {
       logger.info(`Received ${signal}. Shutting down gracefully...`);
       server.close(() => {

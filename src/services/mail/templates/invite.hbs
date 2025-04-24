@@ -1,0 +1,99 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scopology Invitation</title>
+  </head>
+  <body
+    style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Segoe UI',Roboto,sans-serif;"
+  >
+    <table
+      align="center"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      bgcolor="#f5f5f5"
+    >
+      <tr>
+        <td align="center">
+          <table
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06);"
+          >
+            <!-- Header -->
+            <tr style="background-color: #FF5F20;">
+              <td align="center" style="padding: 30px;">
+                <img
+                  src="https://res.cloudinary.com/dhngpbp2y/image/upload/v1745424906/Scopology_1_xgkpsl.png"
+                  alt="Scopology"
+                  width="150"
+                  style="display: block;"
+                />
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding: 40px 30px; font-size: 16px; color: #333;">
+                <p style="margin-top: 0;">Hi <strong>{{fullName}}</strong>,</p>
+
+                <p>
+                  {{#if isResend}}
+                    This is a reminder that you’ve been invited
+                  {{else}}
+                    You’ve been invited
+                  {{/if}}
+                  to join
+                  <strong>Scopology</strong>
+                  as a
+                  <strong>{{roles}}</strong>.
+                </p>
+
+                <p style="margin: 20px 0;">
+                  Click the button below to accept your invite and activate your
+                  account:
+                </p>
+
+                <p style="text-align: center;">
+                  <a
+                    href="{{inviteLink}}"
+                    style="background-color: #FF5F20; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;"
+                  >
+                    Accept Invite
+                  </a>
+                </p>
+
+                <p style="margin-top: 30px;">
+                  Your temporary password is{{#if isResend}} still{{/if}}:
+                  <br />
+                  <code
+                    style="display:inline-block;background:#f0f0f0;padding:6px 12px;border-radius:4px;margin-top:6px;font-weight:bold;color:#FF5F20;"
+                  >
+                    {{userId}}
+                  </code>
+                </p>
+
+                <p style="margin-top: 40px; font-size: 14px; color: #777;">
+                  If you did not expect this email, you can safely ignore it.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="padding: 20px; text-align: center; font-size: 12px; color: #aaa;"
+              >
+                &copy;
+                {{year}}
+                Scopology. All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

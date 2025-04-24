@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
-
 interface ICounter {
-  _id: string; // model name e.g. "User"
+  _id: string;
   seq: number;
 }
 

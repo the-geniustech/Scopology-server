@@ -1,5 +1,5 @@
 import sgMail from "@sendgrid/mail";
-import { EmailProvider, EmailPayload } from "../mail.interface";
+import { EmailProvider, EmailPayload } from "@interfaces/mail.interface";
 import dotenv from "dotenv";
 
 dotenv.config();

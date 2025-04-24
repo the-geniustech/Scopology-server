@@ -22,7 +22,8 @@
       "@models/*": ["models/*"],
       "@interfaces/*": ["interfaces/*"],
       "@constants/*": ["constants/*"],
-      "@modules/*": ["api_v1/modules/*"]
+      "@modules/*": ["api_v1/modules/*"],
+      "@services/*": ["services/*"]
     }
   },
   "include": ["src"],

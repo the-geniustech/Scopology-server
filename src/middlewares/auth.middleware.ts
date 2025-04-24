@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import AppError from "../utils/appError";
-import User from "../models/User.model";
-import { IUserDocument } from "../interfaces/user.interface";
-import { catchAsync } from "../utils/catchAsync";
+import AppError from "@utils/appError";
+import User from "@models/User.model";
+import { IUserDocument } from "@interfaces/user.interface";
+import { catchAsync } from "@utils/catchAsync";
 
 interface DecodedToken {
   id: string;
@@ -11,9 +11,6 @@ interface DecodedToken {
   exp: number;
 }
 
-/**
- * Middleware to protect routes (require JWT token)
- */
 export const protect = catchAsync(
   async (req: Request, _res: Response, next: NextFunction) => {
     let token;
@@ -47,10 +44,6 @@ export const protect = catchAsync(
   }
 );
 
-/**
- * Middleware to restrict route access to specific roles
- * @param roles - allowed roles (e.g. ['administrator'])
- */
 export const restrictedTo = (...roles: ("administrator" | "supervisor")[]) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     const user = req.user as IUserDocument;

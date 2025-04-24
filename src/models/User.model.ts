@@ -59,7 +59,6 @@ const userSchema = new Schema<IUserDocument>(
   }
 );
 
-// 🔐 Password Hashing Middleware
 userSchema.pre<IUserDocument>("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
@@ -67,7 +66,6 @@ userSchema.pre<IUserDocument>("save", async function (next) {
   next();
 });
 
-// ✅ Compare Password Instance Method
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {

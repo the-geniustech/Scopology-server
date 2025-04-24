@@ -4,68 +4,13 @@ import { catchAsync } from "@utils/catchAsync";
 import { sendSuccess } from "@utils/responseHandler";
 import AppError from "@utils/appError";
 import { APIFeatures } from "@utils/apiFeatures.util";
-import { env } from "@config/env";
 import User from "@models/User.model";
 import { buildSearchQuery } from "../utils/search.util";
-import {
-  getNextSequenceIdPreview,
-  incrementSequenceId,
-} from "@models/sequentialIdGenerator.util";
+import { getNextSequenceIdPreview } from "@models/sequentialIdGenerator.util";
 import { idFormatConfig } from "@constants/idPrefixes";
-import { sendEmail } from "services/mail";
-import { EmailPayload } from "services/mail/mail.interface";
-import { generateInviteToken } from "@utils/token.util";
-
-const sequenceOptions = idFormatConfig["User"];
-
-export const inviteUser = catchAsync(async (req: Request, res: Response) => {
-  const nextUserId = await getNextSequenceIdPreview("User", sequenceOptions);
-
-  const user = await UserService.createUser({
-    ...req.body,
-    userId: nextUserId,
-    password: nextUserId, // store it hashed (auto in schema)
-    status: "pending",
-  });
-
-  await incrementSequenceId("User", sequenceOptions);
-
-  // Generate invite token
-  const token = generateInviteToken(user._id as string);
-
-  // Construct invite link
-  const inviteLink = `${env.CLIENT_APP_URL}/accept-invite?token=${token}`;
-
-  // Send invite email
-  await sendEmail({
-    to: user.email,
-    subject: "You’ve been invited to join Scopology",
-    html: `
-      <p>Hi ${user.fullName},</p>
-      <p>You’ve been invited to join Scopology as a <strong>${user.roles.join(
-        ", "
-      )}</strong>.</p>
-      <p>Click below to accept your invite:</p>
-      <p><a href="${inviteLink}">Accept Invite</a></p>
-      <p>Your temporary password is <strong>${nextUserId}</strong></p>
-    `,
-  } as EmailPayload);
-
-  return sendSuccess({
-    res,
-    statusCode: 201,
-    message: "User invited successfully. An invite email has been sent.",
-    data: {
-      fullName: user.fullName,
-      email: user.email,
-      userId: user.userId,
-      status: user.status,
-      roles: user.roles,
-    },
-  });
-});
 
 export const previewNextUserId = catchAsync(async (_req, res) => {
+  const sequenceOptions = idFormatConfig["User"];
   const nextId = await getNextSequenceIdPreview("User", sequenceOptions);
 
   return sendSuccess({
@@ -75,9 +20,6 @@ export const previewNextUserId = catchAsync(async (_req, res) => {
   });
 });
 
-/**
- * Get all users
- */
 export const getAllUsers = catchAsync(async (req, res) => {
   const baseUrl = `${req.baseUrl}${req.path}`;
   const features = new APIFeatures(User.find({ deletedAt: null }), req.query);
@@ -117,9 +59,6 @@ export const searchUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Get user by sequential userId
- */
 export const getUserByUserId = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = parseInt(req.params.userId, 10);
@@ -135,9 +74,6 @@ export const getUserByUserId = catchAsync(
   }
 );
 
-/**
- * Get user by email
- */
 export const getUserByEmail = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const email = req.params.email;
@@ -153,9 +89,6 @@ export const getUserByEmail = catchAsync(
   }
 );
 
-/**
- * Update user by _id
- */
 export const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserService.updateUserById(req.params.id, req.body);
@@ -171,9 +104,6 @@ export const updateUser = catchAsync(
   }
 );
 
-/**
- * Soft delete user by _id
- */
 export const deleteUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const deleted = await UserService.softDeleteUser(req.params.id);

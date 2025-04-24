@@ -10,19 +10,16 @@ import AppError from "./utils/appError";
 
 const app: Application = express();
 
-// ====== Middleware Stack ======
-app.use(helmet()); // Secure HTTP headers
-app.use(cors()); // Enable CORS
-app.use(morgan("dev")); // HTTP request logger
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(cookieParser()); // Parse cookies
-app.use(compression()); // Gzip compression
+app.use(helmet());
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(compression());
 
-// ====== API Routes ======
-app.use("/api/v1", routes); // Centralized route registry
+app.use("/api/v1", routes);
 
-// ====== Health Check ======
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "OK", message: "Scopology API is healthy" });
 });
@@ -34,6 +31,6 @@ app.use(async (req, res, next) => {
 });
 
 // Error handling middleware
-app.use(globalErrorHandler); // Custom error middleware
+app.use(globalErrorHandler);
 
 export default app;

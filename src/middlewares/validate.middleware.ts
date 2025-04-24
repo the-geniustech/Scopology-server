@@ -1,23 +1,24 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { ZodSchema } from "zod";
+import AppError from "../utils/appError";
 
 type RequestPart = "body" | "query" | "params";
 
-export const validate =
-  (schema: ZodSchema<any>, part: RequestPart = "body") =>
-  (req: Request, res: Response, next: NextFunction) => {
-    const result = schema.safeParse(req[part]);
-
-    if (!result.success) {
-      const formatted = result.error.format();
-      return res.status(400).json({
-        status: "fail",
-        message: "Validation failed",
-        errors: formatted,
-      });
+export const validate = (
+  schema: ZodSchema,
+  part: RequestPart = "body"
+): RequestHandler => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    try {
+      req[part] = schema.parse(req[part]);
+      next();
+    } catch (err: any) {
+      const zodErrors = err.errors?.map(
+        (e: any) => `${e.path.join(".")}: ${e.message}`
+      );
+      return next(
+        new AppError(`Validation error: ${zodErrors.join(" | ")}`, 400)
+      );
     }
-
-    // Replace the validated data to ensure it's clean
-    req[part] = result.data;
-    next();
   };
+};
