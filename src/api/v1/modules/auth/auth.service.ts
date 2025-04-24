@@ -104,7 +104,7 @@ export const resendInvite = async (email: string) => {
   const user = await User.findOne({ email });
   if (!user) throw new AppError("User not found", 404);
 
-  if (user.status !== "pending") {
+  if (user.status === "active") {
     throw new AppError("User has already accepted the invite", 400);
   }
 

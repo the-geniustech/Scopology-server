@@ -5,6 +5,7 @@ export const signupSuperAdminSchema = z.object({
   fullName: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(6),
+  setupSecret: z.string().min(8, "Setup secret is required"),
 });
 
 const inviteUserSchema = z.object({

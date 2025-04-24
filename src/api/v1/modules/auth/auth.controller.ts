@@ -10,6 +10,7 @@ import AppError from "@utils/appError";
 export const signupSuperAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { fullName, email, password, setupSecret } = req.body;
+    console.log("Body", req.body);
 
     if (env.NODE_ENV !== "development") {
       return next(
@@ -69,6 +70,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
         roles: user.roles,
         status: user.status,
       },
+      accessToken,
     },
   });
 });
