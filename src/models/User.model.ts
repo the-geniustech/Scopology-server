@@ -29,7 +29,7 @@ const userSchema = new Schema<IUserDocument>(
     },
     roles: {
       type: [String],
-      enum: ["administrator", "supervisor"],
+      enum: ["administrator", "supervisor", "super_admin"],
       default: ["supervisor"],
     },
     status: {

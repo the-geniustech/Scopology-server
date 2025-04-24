@@ -2,6 +2,7 @@ import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { env } from "@config/env";
 import AppError from "@utils/appError";
 import { StringValue } from "ms";
+import { Response } from "express";
 
 interface TokenPayload extends JwtPayload {
   type?: "access" | "invite" | "reset";
@@ -30,4 +31,13 @@ export const verifyToken = (token: string): TokenPayload => {
   } catch (err: any) {
     throw new AppError("Invalid or expired token", 401);
   }
+};
+
+export const setAccessTokenCookie = (res: Response, token: string) => {
+  res.cookie("access_token", token, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 15, // 15 minutes
+  });
 };

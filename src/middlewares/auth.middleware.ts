@@ -44,7 +44,9 @@ export const protect = catchAsync(
   }
 );
 
-export const restrictedTo = (...roles: ("administrator" | "supervisor")[]) => {
+export const restrictedTo = (
+  ...roles: ("administrator" | "supervisor" | "super_admin")[]
+) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     const user = req.user as IUserDocument;
 

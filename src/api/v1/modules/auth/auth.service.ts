@@ -10,6 +10,70 @@ import {
 import { idFormatConfig } from "@constants/idPrefixes";
 import { signToken, verifyToken } from "@utils/token.util";
 
+export const signupSuperAdmin = async ({
+  fullName,
+  email,
+  password,
+}: {
+  fullName: string;
+  email: string;
+  password: string;
+}): Promise<IUserDocument> => {
+  const existingAdmin = await User.findOne({ roles: "super_admin" });
+
+  if (existingAdmin) {
+    throw new AppError("Super administrator already exists.", 403);
+  }
+
+  const nextUserId = await getNextSequenceIdPreview(
+    "User",
+    idFormatConfig["User"]
+  );
+
+  const user = await createUser({
+    fullName,
+    email,
+    password,
+    userId: nextUserId,
+    roles: ["administrator", "supervisor", "super_admin"],
+    status: "active",
+    dateJoined: new Date(),
+  });
+
+  await incrementSequenceId("User", idFormatConfig["User"]);
+
+  return user;
+};
+
+export const login = async (
+  email: string,
+  password: string
+): Promise<IUserDocument> => {
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) throw new AppError("Invalid email or password", 401);
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) throw new AppError("Invalid email or password", 401);
+
+  // Optional: Prevent disabled users from logging in
+  if (user.status !== "active") {
+    if (user.status === "pending") {
+      throw new AppError("Your account is not yet activated.", 403);
+    }
+    if (user.status === "disabled")
+      throw new AppError(
+        "Your account has been disabled. Contact support.",
+        403
+      );
+  }
+
+  // Update last login
+  user.lastLogin = new Date();
+  await user.save();
+
+  return user;
+};
+
 export const inviteUser = async (
   data: Pick<IUserDocument, "fullName" | "email" | "roles">
 ): Promise<{
@@ -29,7 +93,7 @@ export const inviteUser = async (
   await incrementSequenceId("User", sequenceOptions);
 
   const token = signToken(
-    { userId: user._id, type: "invite" },
+    { userId: String(user._id as string), type: "invite" },
     { expiresIn: "3d" }
   );
   const inviteLink = `${env.CLIENT_APP_URL}/accept-invite?token=${token}`;
@@ -63,13 +127,8 @@ export const createUser = async (
 };
 
 export const acceptInvite = async (
-  token: string,
-  newPassword: string
-): Promise<IUserDocument> => {
-  if (!token || !newPassword) {
-    throw new AppError("Token and password are required", 400);
-  }
-
+  token: string
+): Promise<{ user: IUserDocument; accessToken: string }> => {
   const decoded = verifyToken(token);
 
   if (decoded.type !== "invite") {
@@ -79,15 +138,34 @@ export const acceptInvite = async (
   const user = await User.findById(decoded.userId).select("+password");
   if (!user) throw new AppError("User not found", 404);
 
-  if (user.status === "active") {
-    throw new AppError("Invite already accepted", 400);
+  if (user.status !== "pending") {
+    throw new AppError("Only pending invites can be accepted", 400);
   }
 
-  user.password = newPassword;
   user.status = "active";
   user.dateJoined = new Date();
 
-  return await user.save();
+  await user.save();
+
+  const accessToken = signToken({ id: user._id, type: "access" });
+
+  return { user, accessToken };
+};
+
+export const revokeInvite = async (email: string): Promise<void> => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.status !== "pending") {
+    throw new AppError("Only pending invites can be revoked", 400);
+  }
+
+  user.status = "disabled";
+  user.deletedAt = new Date();
+  await user.save();
 };
 
 export const register = async (
@@ -98,22 +176,6 @@ export const register = async (
 
   const user = await User.create(userData as IUserDocument);
   const token = signToken({ id: user._id, type: "access" });
-
-  return { user, token };
-};
-
-export const login = async (
-  email: string,
-  password: string
-): Promise<{ user: IUserDocument; token: string }> => {
-  const user = await User.findOne({ email }).select("+password");
-  if (!user) throw new AppError("Invalid email or password", 401);
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) throw new AppError("Invalid email or password", 401);
-
-  const token = signToken({ id: user._id, type: "access" });
-  user.password = "";
 
   return { user, token };
 };

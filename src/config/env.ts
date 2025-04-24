@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10),
   JWT_EXPIRES_IN: z.string(),
   CLIENT_APP_URL: z.string().url(),
+  SUPERADMIN_SETUP_SECRET: z.string().min(10),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

@@ -4,14 +4,22 @@ import {
   validateInviteUser,
   validateAcceptInvite,
   validateResendInviteUser,
+  validateRevokeInvite,
+  validateSignupSuperAdmin,
+  validateLogin,
 } from "./auth.validator";
 import { UserRole } from "@constants/roles";
 import { protect, restrictedTo } from "@middlewares/auth.middleware";
-import { resendInvite } from "./auth.service";
 
 const router = Router();
 
-router.post("/login", authController.loginUser);
+router.post(
+  "/signup-superadmin",
+  validateSignupSuperAdmin,
+  authController.signupSuperAdmin
+);
+
+router.post("/login", validateLogin, authController.login);
 router.post("/add-user", authController.registerUser);
 
 router.post(
@@ -34,6 +42,14 @@ router.post(
   "/accept-invite",
   validateAcceptInvite,
   authController.acceptInvite
+);
+
+router.post(
+  "/revoke-invite",
+  protect,
+  restrictedTo(UserRole.ADMINISTRATOR),
+  validateRevokeInvite,
+  authController.revokeInvite
 );
 
 export default router;

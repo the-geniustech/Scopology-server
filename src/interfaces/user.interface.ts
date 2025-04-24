@@ -5,7 +5,7 @@ export interface IUserDocument extends Document {
   fullName: string;
   email: string;
   password: string;
-  roles: ("administrator" | "supervisor")[];
+  roles: ("administrator" | "supervisor" | "super_admin")[];
   status: "pending" | "active" | "disabled";
   isActive: boolean;
   dateJoined: Date | null;

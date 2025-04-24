@@ -3,6 +3,9 @@ import * as AuthService from "./auth.service";
 import { catchAsync } from "@utils/catchAsync";
 import { sendSuccess } from "@utils/responseHandler";
 import { sendUserInviteEmail } from "services/mail/templates/sendUserInviteEmail";
+import { setAccessTokenCookie, signToken } from "@utils/token.util";
+import { env } from "@config/env";
+import AppError from "@utils/appError";
 
 // Temporary/test function to signup a user
 export const registerUser = catchAsync(
@@ -19,6 +22,74 @@ export const registerUser = catchAsync(
     });
   }
 );
+
+export const signupSuperAdmin = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { fullName, email, password, setupSecret } = req.body;
+
+    // ❌ Allow only in development/staging (optional, skip in prod init tools)
+    if (env.NODE_ENV !== "development") {
+      return next(
+        new AppError(
+          "Super admin setup is not allowed in this environment.",
+          403
+        )
+      );
+    }
+
+    // 🔐 Require special setup secret to validate access
+    if (setupSecret !== env.SUPERADMIN_SETUP_SECRET) {
+      return next(new AppError("Invalid setup secret.", 401));
+    }
+
+    const superAdmin = await AuthService.signupSuperAdmin({
+      fullName,
+      email,
+      password,
+    });
+
+    const accessToken = signToken({ id: superAdmin._id, type: "access" });
+    setAccessTokenCookie(res, accessToken);
+
+    return sendSuccess({
+      res,
+      statusCode: 201,
+      message: "Super administrator account created and logged in.",
+      data: {
+        fullName: superAdmin.fullName,
+        email: superAdmin.email,
+        roles: superAdmin.roles,
+        userId: superAdmin.userId,
+      },
+    });
+  }
+);
+
+export const login = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  const user = await AuthService.login(email, password);
+  const accessToken = signToken({
+    id: String(user._id as string),
+    type: "access",
+  });
+
+  setAccessTokenCookie(res, accessToken);
+
+  return sendSuccess({
+    res,
+    message: "Login successful",
+    data: {
+      user: {
+        fullName: user.fullName,
+        email: user.email,
+        userId: user.userId,
+        roles: user.roles,
+        status: user.status,
+      },
+    },
+  });
+});
 
 export const inviteUser = catchAsync(async (req: Request, res: Response) => {
   const { user, inviteLink } = await AuthService.inviteUser(req.body);
@@ -58,39 +129,35 @@ export const resendInvite = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const acceptInvite = catchAsync(async (req, res) => {
-  const { token, password } = req.body;
+  const { token } = req.body;
 
-  const user = await AuthService.acceptInvite(token, password);
+  const { user, accessToken } = await AuthService.acceptInvite(token);
+
+  setAccessTokenCookie(res, accessToken);
 
   return sendSuccess({
     res,
-    message: "Account activated. You can now log in.",
+    message: "Account activated successfully. You are now logged in.",
     data: {
-      fullName: user.fullName,
-      email: user.email,
-      status: user.status,
+      user: {
+        fullName: user.fullName,
+        email: user.email,
+        status: user.status,
+        roles: user.roles,
+        userId: user.userId,
+      },
+      accessToken,
     },
   });
 });
 
-export const loginUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { email, password } = req.body;
-    const { user, token } = await AuthService.login(email, password);
+export const revokeInvite = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
 
-    res.status(200).json({
-      status: "success",
-      message: "Login successful",
-      data: {
-        user,
-        token,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  await AuthService.revokeInvite(email);
+
+  return sendSuccess({
+    res,
+    message: "Invite revoked successfully",
+  });
+});
