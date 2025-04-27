@@ -25,23 +25,3 @@ export const sendSuccess = <T>({
 
   return res.status(statusCode).json(response);
 };
-
-type ErrorResponseOptions = {
-  res: Response;
-  statusCode?: number;
-  message?: string;
-  error?: any;
-};
-
-export const sendError = ({
-  res,
-  statusCode = 500,
-  message = "An unexpected error occurred",
-  error,
-}: ErrorResponseOptions) => {
-  return res.status(statusCode).json({
-    status: "error",
-    message,
-    error,
-  });
-};
