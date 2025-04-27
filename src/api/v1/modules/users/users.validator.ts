@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { Request, Response, NextFunction } from "express";
-import AppError from "@utils/appError";
+import { validate } from "@middlewares/validate.middleware";
 
 const rolesEnum = z.enum(["administrator", "supervisor"]);
 
@@ -13,20 +12,4 @@ const updateUserSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const validateUserUpdate = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-) => {
-  try {
-    req.body = updateUserSchema.parse(req.body);
-    next();
-  } catch (err: any) {
-    const zodErrors = err.errors?.map(
-      (e: any) => `${e.path.join(".")}: ${e.message}`
-    );
-    return next(
-      new AppError(`Validation error: ${zodErrors.join(" | ")}`, 400)
-    );
-  }
-};
+export const validateUserUpdate = validate(updateUserSchema.partial());

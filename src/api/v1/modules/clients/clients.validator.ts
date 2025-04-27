@@ -1,12 +1,22 @@
-import { ClientType } from "@interfaces/client.interface";
-import { validate } from "@middlewares/validate.middleware";
 import { z } from "zod";
+import { validate } from "@middlewares/validate.middleware";
+import { ClientType } from "@interfaces/client.interface";
 
-export const createClientSchema = z.object({
-  brandName: z.string().min(4, "Brand name is required"),
-  name: z.string().min(2, "Name is required"),
-  contact: z.string().email("A valid email is required"),
-  natureOfBusiness: z.nativeEnum(ClientType),
+const clientTypeEnum = z.enum([
+  ClientType.INDUSTRIAL,
+  ClientType.RESIDENTIAL,
+  ClientType.COMMERCIAL,
+]);
+
+const createClientSchema = z.object({
+  brandName: z.string().min(2, { message: "Brand name is required" }),
+  name: z.string().min(2, { message: "Client name is required" }),
+  address: z.string().min(5, { message: "Address is required" }),
+  contact: z.string().min(5, { message: "Contact is required" }),
+  natureOfBusiness: clientTypeEnum,
 });
 
-export const validateUpdateClient = validate(createClientSchema);
+const updateClientSchema = createClientSchema.partial();
+
+export const validateCreateClient = validate(createClientSchema);
+export const validateUpdateClient = validate(updateClientSchema);

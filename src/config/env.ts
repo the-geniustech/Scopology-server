@@ -11,6 +11,9 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string(),
   CLIENT_APP_URL: z.string().url(),
   SUPERADMIN_SETUP_SECRET: z.string().min(10),
+  CLOUDINARY_CLOUD_NAME: z.string().min(2),
+  CLOUDINARY_API_KEY: z.string().min(2),
+  CLOUDINARY_API_SECRET: z.string().min(2),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
