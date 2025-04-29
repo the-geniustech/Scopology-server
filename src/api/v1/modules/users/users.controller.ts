@@ -6,7 +6,7 @@ import AppError from "@utils/appError";
 import { APIFeatures } from "@utils/apiFeatures.util";
 import User from "@models/User.model";
 import { search } from "../../../../utils/search.util";
-import { getNextSequenceIdPreview } from "@models/sequentialIdGenerator.util";
+import { getNextSequenceIdPreview } from "@utils/sequentialIdGenerator.util";
 import { idFormatConfig } from "@constants/idPrefixes";
 
 export const previewNextUserId = catchAsync(

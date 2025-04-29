@@ -6,7 +6,7 @@ import { env } from "@config/env";
 import {
   getNextSequenceIdPreview,
   incrementSequenceId,
-} from "@models/sequentialIdGenerator.util";
+} from "@utils/sequentialIdGenerator.util";
 import { idFormatConfig } from "@constants/idPrefixes";
 import { signToken, verifyToken } from "@utils/token.util";
 
