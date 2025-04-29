@@ -1,20 +1,41 @@
-import { Document, Types } from "mongoose";
+import { ObjectId, Document } from "mongoose";
 
 export type ScopeStatus = "pending" | "approved" | "rejected" | "in-review";
-export type ScopeSource = "manual" | "client_upload" | "site_visit" | "AI";
+export type ScopeSource = "manual" | "client_upload" | "AI";
 
 export interface IScope {
-  scopeId: string; // e.g. SCP-0001
-  version: number;
-  title: string;
-  description?: string;
-  documents?: string[]; // URLs or Cloudinary IDs
+  scopeId: string;
+  client?: ObjectId;
+  entryRequirements: string[];
+  natureOfWork: string;
+  isUploadedScopes?: boolean;
+  uploadedScopes: Object[];
+  projectTitle: string;
+  projectDescription: string;
   status: ScopeStatus;
-  createdFrom: ScopeSource;
-  addedBy: Types.ObjectId;
+  source: ScopeSource;
+  addedBy: ObjectId;
   deletedAt?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export interface IScopeDocument extends IScope, Document {}
+
+export interface ResendScopeInviteOptions {
+  admin: {
+    fullName: string;
+    email: string;
+  };
+  projectTitle: string;
+  scopeTitle: string;
+  acceptLink: string;
+}
+
+export interface ScopeInviteOptions {
+  admin: {
+    fullName: string;
+    email: string;
+  };
+  projectTitle: string;
+  scopeTitle: string;
+  acceptLink: string;
+}

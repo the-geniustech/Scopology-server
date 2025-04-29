@@ -3,7 +3,6 @@ import { Query } from "mongoose";
 export class APIFeatures<T> {
   private query: Query<T[], T>;
   private queryString: Record<string, any>;
-  private totalDocs = 0;
   private page = 1;
   private limit = 20;
 
@@ -12,7 +11,7 @@ export class APIFeatures<T> {
     this.queryString = queryString;
   }
 
-  async applyAllFiltersWithPaginationMeta(baseUrl: string): Promise<{
+  async applyAllFiltersWithPaginationMeta(baseUrl?: string): Promise<{
     data: T[];
     pagination: {
       total: number;
@@ -30,7 +29,6 @@ export class APIFeatures<T> {
       this.query.model.countDocuments(this.query.getFilter()),
     ]);
 
-    this.totalDocs = total;
     const pages = Math.ceil(total / this.limit);
 
     const queryParams = new URLSearchParams(this.queryString);

@@ -10,6 +10,8 @@ router.use(protect);
 
 router.get("/preview/next-id", UserController.previewNextUserId);
 
+router.route("/").get(UserController.getAllUsers);
+
 router.get(
   "/search",
   protect,
@@ -29,17 +31,13 @@ router.get(
   UserController.getUserByUserId
 );
 
-router.patch(
-  "/:id",
-  restrictedTo(UserRole.ADMINISTRATOR),
-  validateUserUpdate,
-  UserController.updateUser
-);
-
-router.delete(
-  "/:id",
-  restrictedTo(UserRole.ADMINISTRATOR),
-  UserController.deleteUser
-);
+router
+  .route("/:id")
+  .patch(
+    restrictedTo(UserRole.ADMINISTRATOR),
+    validateUserUpdate,
+    UserController.updateUser
+  )
+  .delete(restrictedTo(UserRole.ADMINISTRATOR), UserController.deleteUser);
 
 export default router;

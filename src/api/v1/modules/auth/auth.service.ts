@@ -10,6 +10,14 @@ import {
 import { idFormatConfig } from "@constants/idPrefixes";
 import { signToken, verifyToken } from "@utils/token.util";
 
+export const findSuperAdmin = async (): Promise<IUserDocument> => {
+  const superAdmin = await User.findOne({ roles: "super_admin" });
+  if (!superAdmin) {
+    throw new AppError("Super administrator not found.", 404);
+  }
+  return superAdmin;
+};
+
 export const signupSuperAdmin = async ({
   fullName,
   email,
@@ -19,7 +27,7 @@ export const signupSuperAdmin = async ({
   email: string;
   password: string;
 }): Promise<IUserDocument> => {
-  const existingAdmin = await User.findOne({ roles: "super_admin" });
+  const existingAdmin = await findSuperAdmin();
 
   if (existingAdmin) {
     throw new AppError("Super administrator already exists.", 403);

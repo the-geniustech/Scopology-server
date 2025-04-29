@@ -8,30 +8,48 @@ const scopeSchema = new Schema<IScopeDocument>(
       required: true,
       unique: true,
     },
-    version: {
-      type: Number,
-      required: true,
-      default: 1,
-    },
-    title: {
-      type: String,
+    client: {
+      type: Schema.Types.ObjectId,
+      ref: "Client",
       required: true,
     },
-    description: {
-      type: String,
-    },
-    documents: {
+    entryRequirements: {
       type: [String],
       default: [],
+    },
+    natureOfWork: {
+      type: String,
+      required: true,
+    },
+    isUploadedScopes: {
+      type: Boolean,
+      default: false,
+    },
+    uploadedScopes: {
+      type: [Object],
+      validate: {
+        validator(v: Object[]) {
+          return this.isUploadedScopes ? v.length > 0 : true;
+        },
+        message: (props: any) => `${props.path} must have at least one item.`,
+      },
+    },
+    projectTitle: {
+      type: String,
+      required: true,
+    },
+    projectDescription: {
+      type: String,
+      required: true,
     },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected", "in-review"],
       default: "pending",
     },
-    createdFrom: {
+    source: {
       type: String,
-      enum: ["manual", "client_upload", "site_visit", "AI"],
+      enum: ["manual", "client_upload", "AI"],
       default: "manual",
     },
     addedBy: {

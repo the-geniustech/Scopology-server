@@ -1,35 +1,49 @@
 import { ClientType, IClient } from "@interfaces/client.interface";
 import mongoose, { Schema } from "mongoose";
 
+/*
+clientBusinessName
+clientName
+clientAddress
+clientContact
+clientNatureOfBusiness
+clientBio
+clientLogo
+*/
+
 const clientSchema = new Schema<IClient>(
   {
-    brandName: {
+    clientBusinessName: {
       type: String,
       required: true,
       trim: true,
     },
-    name: {
+    clientName: {
       type: String,
       required: true,
       trim: true,
     },
-    address: {
+    clientAddress: {
       type: String,
       required: true,
       trim: true,
     },
-    contact: {
+    clientContact: {
       type: String,
       required: true,
       trim: true,
     },
-    natureOfBusiness: {
+    clientNatureOfBusiness: {
       type: String,
       enum: Object.values(ClientType),
       required: true,
       trim: true,
     },
-    logo: {
+    clientBio: {
+      type: String,
+      trim: true,
+    },
+    clientLogo: {
       type: {
         url: String,
         publicId: String,

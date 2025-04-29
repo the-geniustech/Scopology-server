@@ -1,72 +1,63 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import * as clientService from "./clients.service";
 import { catchAsync } from "@utils/catchAsync";
-import AppError from "@utils/appError";
 import { sendSuccess } from "@utils/responseHandler";
+import { search } from "@utils/search.util";
+import Client from "@models/Client.model";
+import { uploadSingleFileToCloudinary } from "@services/cloudinaryUpload.service";
+import { APIFeatures } from "@utils/apiFeatures.util";
 
 export const createClient = catchAsync(async (req: Request, res: Response) => {
+  let logoData;
+
+  if (req.file) {
+    logoData = await uploadSingleFileToCloudinary(
+      req.file.buffer,
+      "clients",
+      "logos"
+    );
+
+    req.body.clientLogo = logoData;
+  }
+
   const client = await clientService.createClient(req.body);
   sendSuccess({
     res,
     statusCode: 201,
     message: "Client created successfully",
-    data: client,
+    data: { client },
   });
 });
 
-export const getClients = catchAsync(async (_req: Request, res: Response) => {
-  const clients = await clientService.getClients();
-  sendSuccess({
-    res,
-    message: "Clients fetched successfully",
-    data: clients,
+export const getClients = catchAsync(async (req: Request, res: Response) => {
+  const baseUrl = `${req.baseUrl}${req.path}`;
+  const features = new APIFeatures(Client.find({ deletedAt: null }), req.query);
+  const { data: clients } = await features.applyAllFiltersWithPaginationMeta(
+    baseUrl
+  );
+
+  return res.status(200).json({
+    status: "success",
+    message: "Clients retrieved successfully",
     results: clients.length,
+    data: { clients },
   });
 });
 
-export const getClient = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const client = await clientService.getClientById(req.params.id);
+export const searchUsers = catchAsync(async (req: Request, res: Response) => {
+  const keyword = req.query.q as string;
 
-    if (!client) {
-      return next(new AppError("Client not found", 404));
-    }
+  const clients = await search(
+    Client,
+    keyword,
+    ["name", "brandName", "contact"],
+    "brandName name contact logo natureOfBusiness id"
+  );
 
-    sendSuccess({ res, message: "Client fetched successfully", data: client });
-  }
-);
-
-export const updateClient = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const updatedClient = await clientService.updateClient(
-      req.params.id,
-      req.body
-    );
-
-    if (!updatedClient) {
-      return next(new AppError("Client not found", 404));
-    }
-
-    sendSuccess({
-      res,
-      message: "Client updated successfully",
-      data: updatedClient,
-    });
-  }
-);
-
-export const deleteClient = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const deleted = await clientService.deleteClient(req.params.id);
-
-    if (!deleted) {
-      return next(new AppError("Client not found", 404));
-    }
-
-    sendSuccess({
-      res,
-      statusCode: 204,
-      message: "Client deleted successfully",
-    });
-  }
-);
+  return sendSuccess({
+    res,
+    message: "Client search results",
+    results: clients.length,
+    data: { clients },
+  });
+});

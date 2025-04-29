@@ -22,7 +22,7 @@ export const sendUserInviteEmail = async ({
     ? "Scopology Invitation – Resent"
     : "You’ve been invited to join Scopology";
 
-  const html = await renderTemplate("invite", {
+  const html = await renderTemplate("userInvite", {
     fullName: user.fullName,
     roles: user.roles.join(", "),
     inviteLink,

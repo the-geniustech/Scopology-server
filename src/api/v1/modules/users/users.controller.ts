@@ -5,49 +5,45 @@ import { sendSuccess } from "@utils/responseHandler";
 import AppError from "@utils/appError";
 import { APIFeatures } from "@utils/apiFeatures.util";
 import User from "@models/User.model";
-import { buildSearchQuery } from "../utils/search.util";
+import { search } from "../../../../utils/search.util";
 import { getNextSequenceIdPreview } from "@models/sequentialIdGenerator.util";
 import { idFormatConfig } from "@constants/idPrefixes";
 
-export const previewNextUserId = catchAsync(async (_req, res) => {
-  const sequenceOptions = idFormatConfig["User"];
-  const nextId = await getNextSequenceIdPreview("User", sequenceOptions);
+export const previewNextUserId = catchAsync(
+  async (req: Request, res: Response) => {
+    const sequenceOptions = idFormatConfig["User"];
+    const nextId = await getNextSequenceIdPreview("User", sequenceOptions);
 
-  return sendSuccess({
-    res,
-    message: "Next available userId (preview)",
-    data: { nextUserId: nextId },
-  });
-});
+    return sendSuccess({
+      res,
+      message: "Next available userId (preview)",
+      data: { nextUserId: nextId },
+    });
+  }
+);
 
-export const getAllUsers = catchAsync(async (req, res) => {
+export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const baseUrl = `${req.baseUrl}${req.path}`;
   const features = new APIFeatures(User.find({ deletedAt: null }), req.query);
-  const { data, pagination } = await features.applyAllFiltersWithPaginationMeta(
-    baseUrl
-  );
+  const { data: users, pagination } =
+    await features.applyAllFiltersWithPaginationMeta(baseUrl);
 
   return res.status(200).json({
     status: "success",
     message: "Users retrieved successfully",
     pagination,
-    results: data.length,
-    data,
+    results: users.length,
+    data: { users },
   });
 });
 
 export const searchUsers = catchAsync(async (req: Request, res: Response) => {
   const keyword = req.query.q as string;
 
-  if (!keyword || keyword.trim().length < 2) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Search query must be at least 2 characters",
-    });
-  }
-
-  const query = buildSearchQuery(keyword, ["fullName", "email", "phoneNumber"]);
-  const users = await User.find({ deletedAt: null, ...query }).select(
+  const users = await search(
+    User,
+    keyword,
+    ["fullName", "email", "phoneNumber"],
     "userId fullName email phoneNumber roles"
   );
 
@@ -55,7 +51,7 @@ export const searchUsers = catchAsync(async (req: Request, res: Response) => {
     res,
     message: "User search results",
     results: users.length,
-    data: users,
+    data: { users },
   });
 });
 
@@ -69,7 +65,7 @@ export const getUserByUserId = catchAsync(
 
     return sendSuccess({
       res,
-      data: user,
+      data: { user },
     });
   }
 );
@@ -99,7 +95,7 @@ export const updateUser = catchAsync(
     return sendSuccess({
       res,
       message: "User updated successfully",
-      data: user,
+      data: { user },
     });
   }
 );
