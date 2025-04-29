@@ -7,6 +7,8 @@ export const createScopeSchema = z.object({
   isUploadedScopes: z.boolean().optional(),
   projectTitle: z.string(),
   projectDescription: z.string(),
+  addedBy: z.string().optional(),
+  client: z.string().optional(),
 });
 
 const updateScopeSchema = z.object({

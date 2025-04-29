@@ -14,9 +14,18 @@ import {
 import { findSuperAdmin } from "../auth/auth.service";
 import { ScopeStatus } from "@constants/scope";
 import { createScopeSchema } from "./scope.validator";
-import { IScope } from "@interfaces/scope.interface";
+import { IUserDocument } from "@interfaces/user.interface";
+import {
+  getNextSequenceIdPreview,
+  incrementSequenceId,
+} from "@utils/sequentialIdGenerator.util";
+import { idFormatConfig } from "@constants/idPrefixes";
 
 export const createScope = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.user as IUserDocument;
+  const sequenceOptions = idFormatConfig["Scope"];
+  const nextUserId = await getNextSequenceIdPreview("Scope", sequenceOptions);
+
   const clientData = validateData(createClientSchema, req.body);
   if (!clientData) {
     throw new AppError("Client information is required to create a scope", 400);
@@ -24,18 +33,21 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
 
   const client = await ClientService.createClient(clientData as IClient);
 
-  req.body.clientId = client._id;
+  req.body.client = client.id;
+  req.body.addedBy = id;
 
-  const scopeData = validateData(createScopeSchema, req.body);
-  if (!scopeData) {
-    throw new AppError("Scope data is required", 400);
-  }
+  req.body = validateData(createScopeSchema, req.body);
+  // if (!scopeData) {
+  //   throw new AppError("Scope data is required", 400);
+  // }
 
-  const scope = await ScopeService.createScope(scopeData as IScope);
+  const scope = await ScopeService.createScope(req.body);
 
   if (!scope) {
     throw new AppError("Scope could not be created", 500);
   }
+
+  await incrementSequenceId("Scope", sequenceOptions);
 
   const { fullName, email } = await findSuperAdmin();
 
