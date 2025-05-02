@@ -15,6 +15,7 @@ import { getInitials } from "@utils/getInitials.util";
 import { APIFeatures } from "@utils/apiFeatures.util";
 import Scope from "@models/Scope.model";
 import { IScope } from "@interfaces/scope.interface";
+import { sendScopeRejectionEmail } from "@services/mail/templates/sendScopeRejectionEmail";
 
 export const createScope = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = req.user || {};
@@ -137,9 +138,12 @@ export const acceptScopeInvite = catchAsync(
 export const rejectScopeInvite = catchAsync(
   async (req: Request, res: Response) => {
     const { scopeId } = req.params;
+    const { reason, message } = req.body;
 
-    const scope = await ScopeService.getScopeById(scopeId);
-
+    const scope = await Scope.findById(scopeId).populate(
+      "client",
+      "clientName clientEmail"
+    );
     if (!scope || scope.deletedAt) {
       throw new AppError("Scope not found or has been deleted", 404);
     }
@@ -149,12 +153,39 @@ export const rejectScopeInvite = catchAsync(
     }
 
     scope.status = ScopeStatus.REJECTED;
+    scope.rejectionReason = reason;
+    scope.rejectionMessage = message;
+
     await scope.save();
+
+    if (
+      !scope.client ||
+      typeof scope.client !== "object" ||
+      !("clientName" in scope.client) ||
+      !("clientEmail" in scope.client)
+    ) {
+      throw new AppError("Invalid client data in scope", 500);
+    }
+    const { clientName, clientEmail } = scope.client as {
+      clientName: string;
+      clientEmail: string;
+    };
+
+    await sendScopeRejectionEmail({
+      clientEmail,
+      clientName,
+      projectTitle: scope.projectTitle,
+      scopeTitle: scope.natureOfWork,
+      rejectionReason: scope.rejectionReason!,
+      rejectionMessage: scope.rejectionMessage,
+    });
 
     return sendSuccess({
       res,
-      message: "Scope invite rejected successfully",
-      data: { scope },
+      message: "Scope has been rejected successfully",
+      data: {
+        scope: { scopeId: scope.scopeId, reason, message },
+      },
     });
   }
 );

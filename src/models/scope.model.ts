@@ -47,6 +47,14 @@ const scopeSchema = new Schema<IScopeDocument>(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+    rejectionMessage: {
+      type: String,
+      default: null,
+    },
     source: {
       type: String,
       enum: ["manual", "client_upload", "AI"],

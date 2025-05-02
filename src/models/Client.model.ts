@@ -1,16 +1,6 @@
 import { ClientType, IClient } from "@interfaces/client.interface";
 import mongoose, { Schema } from "mongoose";
 
-/*
-clientBusinessName
-clientName
-clientAddress
-clientContact
-clientNatureOfBusiness
-clientBio
-clientLogo
-*/
-
 const clientSchema = new Schema<IClient>(
   {
     clientBusinessName: {
@@ -28,10 +18,17 @@ const clientSchema = new Schema<IClient>(
       required: true,
       trim: true,
     },
-    clientContact: {
+    clientPhone: {
       type: String,
       required: true,
       trim: true,
+    },
+    clientEmail: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      unique: true,
     },
     clientNatureOfBusiness: {
       type: String,

@@ -8,7 +8,8 @@ export interface IClient extends Document {
   clientBusinessName: string;
   clientName: string;
   clientAddress: string;
-  clientContact: string;
+  clientPhone: string;
+  clientEmail: string;
   clientNatureOfBusiness: ClientType;
   clientBio?: string;
   clientLogo?: {

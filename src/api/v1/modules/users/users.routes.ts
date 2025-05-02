@@ -8,9 +8,11 @@ const router = Router();
 
 router.use(protect);
 
+router.route("/").get(UserController.getAllUsers);
+
 router.get("/preview/next-id", UserController.previewNextUserId);
 
-router.route("/").get(UserController.getAllUsers);
+router.get("/stats", UserController.getUserStatsController);
 
 router.get(
   "/search",

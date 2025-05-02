@@ -14,7 +14,7 @@ router
   .post(
     protect,
     restrictedTo(UserRole.ADMINISTRATOR),
-    uploadSingle("logo"),
+    uploadSingle("clientLogo"),
     validateCreateClient,
     clientController.createClient
   )

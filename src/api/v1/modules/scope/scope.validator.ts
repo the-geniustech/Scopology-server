@@ -30,5 +30,19 @@ const updateScopeSchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]).optional(),
 });
 
+export const rejectScopeSchema = z.object({
+  reason: z
+    .string()
+    .min(3, { message: "Please provide a valid reason" })
+    .max(100, { message: "Reason is too long" }),
+
+  message: z
+    .string()
+    .trim()
+    .max(1000, { message: "Rejection message is too long" })
+    .optional(),
+});
+
 export const validateCreateScope = validate(createScopeSchema);
 export const validateUpdateScope = validate(updateScopeSchema);
+export const validateRejectScope = validate(rejectScopeSchema);

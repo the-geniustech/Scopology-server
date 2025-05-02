@@ -1,11 +1,8 @@
 import { Router } from "express";
 import * as ScopeController from "./scope.controller";
 import { protect } from "@middlewares/auth.middleware";
-import { validateUpdateScope } from "./scope.validator";
-import {
-  uploadFields,
-  uploadClientLogoAndUploadedScopes,
-} from "@middlewares/fileUpload.middleware";
+import { validateRejectScope, validateUpdateScope } from "./scope.validator";
+import { uploadClientLogoAndUploadedScopes } from "@middlewares/fileUpload.middleware";
 import { parseFormData } from "@middlewares/parseFormData.middleware";
 
 const router = Router();
@@ -35,6 +32,8 @@ router
 
 router.route("/:scopeId/accept").patch(ScopeController.acceptScopeInvite);
 
-router.route("/:scopeId/reject").patch(ScopeController.rejectScopeInvite);
+router
+  .route("/:scopeId/reject")
+  .patch(validateRejectScope, ScopeController.rejectScopeInvite);
 
 export default router;

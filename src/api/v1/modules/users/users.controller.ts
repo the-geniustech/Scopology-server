@@ -37,6 +37,18 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const getUserStatsController = catchAsync(
+  async (_req: Request, res: Response) => {
+    const stats = await UserService.getUserStats();
+
+    sendSuccess({
+      res,
+      message: "User stats retrieved successfully",
+      data: stats,
+    });
+  }
+);
+
 export const searchUsers = catchAsync(async (req: Request, res: Response) => {
   const keyword = req.query.q as string;
 

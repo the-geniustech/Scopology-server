@@ -16,6 +16,8 @@ export interface IScope {
   source: ScopeSource;
   addedBy: ObjectId;
   deletedAt?: Date | null;
+  rejectionReason?: string;
+  rejectionMessage?: string;
 }
 
 export interface IScopeDocument extends IScope, Document {}

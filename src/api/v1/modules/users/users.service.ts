@@ -26,6 +26,28 @@ export const createUser = async (
   return await user.save();
 };
 
+export const getUserStats = async () => {
+  const result = await User.aggregate([
+    { $match: { deletedAt: null } },
+    {
+      $facet: {
+        total: [{ $count: "count" }],
+        active: [{ $match: { status: "active" } }, { $count: "count" }],
+        disabled: [{ $match: { status: "disabled" } }, { $count: "count" }],
+      },
+    },
+    {
+      $project: {
+        total: { $ifNull: [{ $arrayElemAt: ["$total.count", 0] }, 0] },
+        active: { $ifNull: [{ $arrayElemAt: ["$active.count", 0] }, 0] },
+        disabled: { $ifNull: [{ $arrayElemAt: ["$disabled.count", 0] }, 0] },
+      },
+    },
+  ]);
+
+  return result[0] || { total: 0, active: 0, disabled: 0 };
+};
+
 export const getUserByEmail = async (
   email: string,
   includePassword = false

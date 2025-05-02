@@ -14,17 +14,22 @@ export const createClientSchema = z.object({
   clientName: z.string().min(2, { message: "Client name is required" }),
 
   clientAddress: z.string().min(5, { message: "Client Address is required" }),
-  clientContact: z.string().min(5, { message: "Client Contact is required" }),
+  clientPhone: z.string().min(5, { message: "Client Contact is required" }),
+  clientEmail: z
+    .string()
+    .email({ message: "Please provide a valid email address" }),
   clientNatureOfBusiness: clientTypeEnum,
   clientBio: z
     .string()
     .min(5, { message: "About should not be less than 5 characters" })
     .max(500, { message: "About must be less than 500 characters" })
     .optional(),
-  clientLogo: z.object({
-    publicId: z.string(),
-    url: z.string(),
-  }),
+  clientLogo: z
+    .object({
+      publicId: z.string(),
+      url: z.string(),
+    })
+    .optional(),
 });
 
 const updateClientSchema = createClientSchema.partial();

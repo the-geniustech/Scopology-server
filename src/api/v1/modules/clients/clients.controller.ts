@@ -10,12 +10,15 @@ import { APIFeatures } from "@utils/apiFeatures.util";
 export const createClient = catchAsync(async (req: Request, res: Response) => {
   let logoData;
 
+  console.log("File: ", req.file);
   if (req.file) {
     logoData = await uploadSingleFileToCloudinary(
       req.file.buffer,
       "clients",
       "logos"
     );
+
+    console.log("Logo data", logoData);
 
     req.body.clientLogo = logoData;
   }
