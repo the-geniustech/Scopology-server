@@ -5,7 +5,7 @@ import AppError from "@utils/appError";
 const storage = multer.memoryStorage();
 
 const fileFilter = (
-  req: Request,
+  _req: Request,
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
@@ -21,23 +21,25 @@ const fileFilter = (
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  if (file.fieldname === "logo") {
+  if (file.fieldname === "clientLogo") {
     if (!allowedImageMimeTypes.includes(file.mimetype)) {
       return cb(
         new AppError(
-          "Invalid file type for logo. Only images are allowed.",
+          "Invalid file type for clientLogo. Only images are allowed.",
           400
         )
       );
     }
   }
 
-  if (file.fieldname === "document") {
+  if (file.fieldname === "uploadedScopes") {
     if (
       !allowedDocumentMimeTypes.includes(file.mimetype) &&
       !allowedImageMimeTypes.includes(file.mimetype)
     ) {
-      return cb(new AppError("Invalid file type for document upload.", 400));
+      return cb(
+        new AppError("Invalid file type for uploadedScopes upload.", 400)
+      );
     }
   }
 
@@ -59,3 +61,8 @@ export const uploadMultiple = (fieldName: string, maxCount = 5) =>
 
 export const uploadFields = (fields: { name: string; maxCount?: number }[]) =>
   upload.fields(fields);
+
+export const uploadClientLogoAndUploadedScopes = upload.fields([
+  { name: "clientLogo", maxCount: 1 },
+  { name: "uploadedScopes", maxCount: 10 },
+]);

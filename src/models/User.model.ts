@@ -24,7 +24,7 @@ const userSchema = new Schema<IUserDocument>(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      min: [5, "Password must be at least 4 characters"],
       select: false,
     },
     roles: {

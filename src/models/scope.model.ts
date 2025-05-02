@@ -44,7 +44,7 @@ const scopeSchema = new Schema<IScopeDocument>(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected", "in-review"],
+      enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
     source: {

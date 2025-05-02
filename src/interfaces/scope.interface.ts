@@ -1,6 +1,6 @@
 import { ObjectId, Document } from "mongoose";
 
-export type ScopeStatus = "pending" | "approved" | "rejected" | "in-review";
+export type ScopeStatus = "pending" | "approved" | "rejected";
 export type ScopeSource = "manual" | "client_upload" | "AI";
 
 export interface IScope {

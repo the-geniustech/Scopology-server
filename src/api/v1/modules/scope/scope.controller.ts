@@ -7,65 +7,64 @@ import { sendSuccess } from "@utils/responseHandler";
 import { validateData } from "@middlewares/validate.middleware";
 import { createClientSchema } from "../clients/clients.validator";
 import { IClient } from "@interfaces/client.interface";
-import {
-  resendScopeInviteEmail,
-  sendScopeInviteEmail,
-} from "@services/mail/templates/sendScopeInviteEmail";
+import { resendScopeInviteEmail } from "@services/mail/templates/sendScopeInviteEmail";
 import { findSuperAdmin } from "../auth/auth.service";
 import { ScopeStatus } from "@constants/scope";
 import { createScopeSchema } from "./scope.validator";
-import { IUserDocument } from "@interfaces/user.interface";
-import {
-  getNextSequenceIdPreview,
-  incrementSequenceId,
-} from "@utils/sequentialIdGenerator.util";
-import { idFormatConfig } from "@constants/idPrefixes";
+import { getInitials } from "@utils/getInitials.util";
+import { APIFeatures } from "@utils/apiFeatures.util";
+import Scope from "@models/Scope.model";
+import { IScope } from "@interfaces/scope.interface";
 
 export const createScope = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.user as IUserDocument;
-  const sequenceOptions = idFormatConfig["Scope"];
-  const nextUserId = await getNextSequenceIdPreview("Scope", sequenceOptions);
+  const { id: userId } = req.user || {};
 
-  const clientData = validateData(createClientSchema, req.body);
-  if (!clientData) {
-    throw new AppError("Client information is required to create a scope", 400);
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const { logoUploadResult, uploadedDocuments } =
+    await ScopeService.handleScopeUploads(files);
+
+  let client;
+  if (req.body.clientId) {
+    console.log("Client ID", req.body.clientId);
+    client = await ClientService.getClientById(req.body.clientId);
+    if (!client) throw new AppError("Client not found", 404);
+  } else {
+    console.log("Creating new client", req.body);
+    if (logoUploadResult) req.body.clientLogo = logoUploadResult;
+    const clientData = validateData(createClientSchema, req.body);
+    client = await ClientService.createClient(clientData as Partial<IClient>);
   }
 
-  const client = await ClientService.createClient(clientData as IClient);
+  const scopeId = await ScopeService.generateNextScopeId(
+    getInitials(client.clientName)
+  );
 
-  req.body.client = client.id;
-  req.body.addedBy = id;
+  const scopePayload = {
+    ...req.body,
+    scopeId,
+    client: client.id,
+    addedBy: userId,
+    status: ScopeStatus.PENDING,
+    uploadedScopes: uploadedDocuments,
+  };
 
-  req.body = validateData(createScopeSchema, req.body);
-  // if (!scopeData) {
-  //   throw new AppError("Scope data is required", 400);
-  // }
+  const validatedData = validateData(createScopeSchema, scopePayload);
 
-  const scope = await ScopeService.createScope(req.body);
+  const scope = await ScopeService.createScope(
+    validatedData as Partial<IScope>
+  );
+  const populatedScope = await scope.populate(
+    "client addedBy",
+    "clientName clientBusinessName clientLogo fullName email"
+  );
 
-  if (!scope) {
-    throw new AppError("Scope could not be created", 500);
-  }
-
-  await incrementSequenceId("Scope", sequenceOptions);
-
-  const { fullName, email } = await findSuperAdmin();
-
-  await sendScopeInviteEmail({
-    admin: {
-      fullName,
-      email,
-    },
-    projectTitle: req.body.projectTitle,
-    scopeTitle: req.body.natureOfWork,
-    acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
-  });
+  await ScopeService.notifyAdminOnScopeCreation(populatedScope);
 
   return sendSuccess({
     res,
     statusCode: 201,
     message: "Scope created successfully and invite sent",
-    data: { scope },
+    data: { scope: populatedScope },
   });
 });
 
@@ -90,10 +89,7 @@ export const resendScopeInvite = catchAsync(
     const { fullName, email } = await findSuperAdmin();
 
     await resendScopeInviteEmail({
-      admin: {
-        fullName,
-        email,
-      },
+      admin: { fullName, email },
       projectTitle: scope.projectTitle,
       scopeTitle: scope.natureOfWork,
       acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
@@ -103,9 +99,11 @@ export const resendScopeInvite = catchAsync(
       res,
       message: "Scope invite resent successfully",
       data: {
-        scopeId: scope._id,
-        projectTitle: scope.projectTitle,
-        scopeTitle: scope.natureOfWork,
+        scope: {
+          scopeId: scope._id,
+          projectTitle: scope.projectTitle,
+          scopeTitle: scope.natureOfWork,
+        },
       },
     });
   }
@@ -131,7 +129,7 @@ export const acceptScopeInvite = catchAsync(
     return sendSuccess({
       res,
       message: "Scope invite accepted successfully",
-      data: scope,
+      data: { scope },
     });
   }
 );
@@ -156,7 +154,18 @@ export const rejectScopeInvite = catchAsync(
     return sendSuccess({
       res,
       message: "Scope invite rejected successfully",
-      data: scope,
+      data: { scope },
+    });
+  }
+);
+
+export const getScopeStatsController = catchAsync(
+  async (_req: Request, res: Response) => {
+    const stats = await ScopeService.getScopeStats();
+    sendSuccess({
+      res,
+      message: "Scope stats retrieved successfully",
+      data: { scopes: { stats } },
     });
   }
 );
@@ -171,18 +180,28 @@ export const getScope = catchAsync(async (req: Request, res: Response) => {
   return sendSuccess({
     res,
     message: "Scope fetched successfully",
-    data: scope,
+    data: { scope },
   });
 });
 
-export const listScopes = catchAsync(async (_req: Request, res: Response) => {
-  const scopes = await ScopeService.listScopes();
+export const listScopes = catchAsync(async (req: Request, res: Response) => {
+  const baseUrl = `${req.baseUrl}${req.path}`;
+  const features = new APIFeatures(
+    Scope.find({ deletedAt: null }).populate(
+      "client addedBy",
+      "clientBusinessName clientName clientLogo fullName email "
+    ),
+    req.query
+  );
+  const { data: scopes, pagination } =
+    await features.applyAllFiltersWithPaginationMeta(baseUrl);
 
-  return sendSuccess({
-    res,
+  return res.status(200).json({
+    status: "success",
     message: "List of scopes",
+    pagination,
     results: scopes.length,
-    data: scopes,
+    data: { scopes },
   });
 });
 
@@ -196,7 +215,7 @@ export const updateScope = catchAsync(async (req: Request, res: Response) => {
   return sendSuccess({
     res,
     message: "Scope updated successfully",
-    data: updatedScope,
+    data: { scope: updatedScope },
   });
 });
 

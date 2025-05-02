@@ -9,7 +9,6 @@ export const validate = (
   part: RequestPart = "body"
 ): RequestHandler => {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    console.log("validate FN", req[part]);
     try {
       req[part] = schema.parse(req[part]);
       next();
@@ -33,7 +32,6 @@ export const validateData = <T>(
   data: unknown,
   safe: boolean = false
 ): T | ValidationResult<T> => {
-  console.log("validateData FN", data);
   try {
     const parsed = schema.parse(data);
     return safe ? { success: true, data: parsed } : parsed;

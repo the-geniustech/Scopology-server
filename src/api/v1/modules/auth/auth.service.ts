@@ -33,10 +33,7 @@ export const signupSuperAdmin = async ({
     throw new AppError("Super administrator already exists.", 403);
   }
 
-  const nextUserId = await getNextSequenceIdPreview(
-    "User",
-    idFormatConfig["User"]
-  );
+  const nextUserId = await getNextSequenceIdPreview("User");
 
   const user = await createUser({
     fullName,
@@ -87,8 +84,7 @@ export const inviteUser = async (
   user: IUserDocument;
   inviteLink: string;
 }> => {
-  const sequenceOptions = idFormatConfig["User"];
-  const nextUserId = await getNextSequenceIdPreview("User", sequenceOptions);
+  const nextUserId = await incrementSequenceId("User");
 
   const user = await createUser({
     ...data,
@@ -97,7 +93,7 @@ export const inviteUser = async (
     status: "pending",
   });
 
-  await incrementSequenceId("User", sequenceOptions);
+  await incrementSequenceId("User");
 
   const token = signToken(
     { userId: String(user._id as string), type: "invite" },
