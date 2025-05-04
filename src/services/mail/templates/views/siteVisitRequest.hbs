@@ -1,0 +1,51 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Site Visit Request</title>
+    <style>
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4; color: #333; padding: 20px; } .container {
+      background: #ffffff; border-radius: 8px; padding: 30px; max-width: 600px;
+      margin: auto; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); } .header {
+      text-align: center; margin-bottom: 20px; } .header img { height: 50px; }
+      .info { margin-bottom: 20px; line-height: 1.6; } .btn { display:
+      inline-block; padding: 12px 24px; background-color: #ff5f20; color:
+      #ffffff; text-decoration: none; font-weight: bold; border-radius: 6px;
+      text-align: center; } .footer { margin-top: 30px; text-align: center;
+      font-size: 12px; color: #999; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://res.cloudinary.com/dhngpbp2y/image/upload/v1745418384/Scopology_tpzklz.png"
+          alt="Scopology Logo"
+        />
+      </div>
+
+      <h2>🚧 New Site Visit Request</h2>
+      <div class="info">
+        <p><strong>Client:</strong> {{clientName}}</p>
+        <p><strong>Project:</strong> {{projectTitle}}</p>
+        <p><strong>Client Representative:</strong> {{clientRepresentative}}</p>
+        <p><strong>Contact Method:</strong> {{contactMethod}}</p>
+        <p><strong>Scheduled Date:</strong> {{siteVisitDate}}</p>
+        <p><strong>Scheduled Time:</strong> {{siteVisitTime}}</p>
+      </div>
+
+      <p>Please click below to review and take action:</p>
+      <p style="text-align: center;">
+        <a href="{{dashboardUrl}}" class="btn">Review Site Visit</a>
+      </p>
+
+      <p>Thanks,<br />The Scopology Team</p>
+
+      <div class="footer">
+        &copy;
+        {{year}}
+        Scopology. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

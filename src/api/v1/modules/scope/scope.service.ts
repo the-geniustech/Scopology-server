@@ -5,8 +5,12 @@ import {
   uploadMultipleFilesToCloudinary,
   uploadSingleFileToCloudinary,
 } from "@services/cloudinaryUpload.service";
-import { sendScopeInviteEmail } from "@services/mail/templates/sendScopeInviteEmail";
+import {
+  ScopeApprovalEmailOptions,
+  sendScopeApprovalEmail,
+} from "@services/mail/templates/sendScopeApprovalEmail";
 import { findSuperAdmin } from "@modules/auth/auth.service";
+import { sendScopeApprovalRequestEmail } from "@services/mail/templates/sendScopeApprovalRequestEmail";
 
 export const createScope = async (data: Partial<IScope>) => {
   const scope = new Scope(data);
@@ -47,13 +51,14 @@ export const handleScopeUploads = async (files: {
 
 export const notifyAdminOnScopeCreation = async (scope: IScopeDocument) => {
   const { fullName, email } = await findSuperAdmin();
+  console.log("Admin Details:", fullName, email);
 
-  await sendScopeInviteEmail({
+  await sendScopeApprovalRequestEmail({
     admin: { fullName, email },
     projectTitle: scope.projectTitle,
     scopeTitle: scope.natureOfWork,
     acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
-  });
+  } as ScopeApprovalEmailOptions);
 };
 
 export const getScopeStats = async () => {

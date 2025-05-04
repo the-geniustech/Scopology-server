@@ -2,19 +2,19 @@ import { renderTemplate } from "../renderTemplate";
 import { sendEmail } from "../index";
 import { EmailPayload } from "@interfaces/mail.interface";
 import {
-  ResendScopeInviteOptions,
-  ScopeInviteOptions,
+  ResendScopeApprovalOptions,
+  ScopeApprovalOptions,
 } from "@interfaces/scope.interface";
 
-export const sendScopeInviteEmail = async ({
+export const sendScopeApprovalRequestEmail = async ({
   admin,
   projectTitle,
   scopeTitle,
   acceptLink,
-}: ScopeInviteOptions): Promise<void> => {
+}: ScopeApprovalOptions): Promise<void> => {
   const subject = `Action Required: Accept Project Scope Invitation`;
 
-  const html = await renderTemplate("scopeInvite", {
+  const html = await renderTemplate("ScopeApproval", {
     fullName: admin.fullName,
     projectTitle,
     scopeTitle,
@@ -29,15 +29,15 @@ export const sendScopeInviteEmail = async ({
   } as EmailPayload);
 };
 
-export const resendScopeInviteEmail = async ({
+export const resendScopeApprovalRequestEmail = async ({
   admin,
   projectTitle,
   scopeTitle,
   acceptLink,
-}: ResendScopeInviteOptions): Promise<void> => {
+}: ResendScopeApprovalOptions): Promise<void> => {
   const subject = `Reminder: Accept Your Project Scope Invitation`;
 
-  const html = await renderTemplate("scopeInvite", {
+  const html = await renderTemplate("ScopeApproval", {
     fullName: admin.fullName,
     projectTitle,
     scopeTitle,

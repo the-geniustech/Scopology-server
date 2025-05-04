@@ -21,7 +21,10 @@ const fileFilter = (
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  if (file.fieldname === "clientLogo") {
+  const imageFieldNames = ["clientLogo", "userProfilePicture"];
+  const documentFieldNames = ["uploadedScopes"];
+
+  if (imageFieldNames.includes(file.fieldname)) {
     if (!allowedImageMimeTypes.includes(file.mimetype)) {
       return cb(
         new AppError(
@@ -32,7 +35,7 @@ const fileFilter = (
     }
   }
 
-  if (file.fieldname === "uploadedScopes") {
+  if (documentFieldNames.includes(file.fieldname)) {
     if (
       !allowedDocumentMimeTypes.includes(file.mimetype) &&
       !allowedImageMimeTypes.includes(file.mimetype)

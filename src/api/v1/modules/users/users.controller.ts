@@ -8,6 +8,7 @@ import User from "@models/User.model";
 import { search } from "../../../../utils/search.util";
 import { getNextSequenceIdPreview } from "@utils/sequentialIdGenerator.util";
 import { idFormatConfig } from "@constants/idPrefixes";
+import { model } from "mongoose";
 
 export const previewNextUserId = catchAsync(
   async (req: Request, res: Response) => {
@@ -52,12 +53,12 @@ export const getUserStatsController = catchAsync(
 export const searchUsers = catchAsync(async (req: Request, res: Response) => {
   const keyword = req.query.q as string;
 
-  const users = await search(
-    User,
+  const users = await search({
+    model: User,
     keyword,
-    ["fullName", "email", "phoneNumber"],
-    "userId fullName email phoneNumber roles"
-  );
+    searchFields: ["fullName", "email", "phoneNumber"],
+    selectFields: "userId fullName email phoneNumber roles",
+  });
 
   return sendSuccess({
     res,

@@ -7,7 +7,6 @@ import { sendSuccess } from "@utils/responseHandler";
 import { validateData } from "@middlewares/validate.middleware";
 import { createClientSchema } from "../clients/clients.validator";
 import { IClient } from "@interfaces/client.interface";
-import { resendScopeInviteEmail } from "@services/mail/templates/sendScopeInviteEmail";
 import { findSuperAdmin } from "../auth/auth.service";
 import { ScopeStatus } from "@constants/scope";
 import { createScopeSchema } from "./scope.validator";
@@ -16,6 +15,12 @@ import { APIFeatures } from "@utils/apiFeatures.util";
 import Scope from "@models/Scope.model";
 import { IScope } from "@interfaces/scope.interface";
 import { sendScopeRejectionEmail } from "@services/mail/templates/sendScopeRejectionEmail";
+import {
+  ScopeApprovalEmailOptions,
+  sendScopeApprovalEmail,
+} from "@services/mail/templates/sendScopeApprovalEmail";
+import { resendScopeApprovalRequestEmail } from "@services/mail/templates/sendScopeApprovalRequestEmail";
+import { search } from "@utils/search.util";
 
 export const createScope = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = req.user || {};
@@ -26,11 +31,9 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
 
   let client;
   if (req.body.clientId) {
-    console.log("Client ID", req.body.clientId);
     client = await ClientService.getClientById(req.body.clientId);
     if (!client) throw new AppError("Client not found", 404);
   } else {
-    console.log("Creating new client", req.body);
     if (logoUploadResult) req.body.clientLogo = logoUploadResult;
     const clientData = validateData(createClientSchema, req.body);
     client = await ClientService.createClient(clientData as Partial<IClient>);
@@ -69,7 +72,7 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const resendScopeInvite = catchAsync(
+export const resendScopeApproval = catchAsync(
   async (req: Request, res: Response) => {
     const { scopeId } = req.params;
 
@@ -89,7 +92,7 @@ export const resendScopeInvite = catchAsync(
 
     const { fullName, email } = await findSuperAdmin();
 
-    await resendScopeInviteEmail({
+    await resendScopeApprovalRequestEmail({
       admin: { fullName, email },
       projectTitle: scope.projectTitle,
       scopeTitle: scope.natureOfWork,
@@ -110,85 +113,117 @@ export const resendScopeInvite = catchAsync(
   }
 );
 
-export const acceptScopeInvite = catchAsync(
-  async (req: Request, res: Response) => {
-    const { scopeId } = req.params;
+export const approveScope = catchAsync(async (req: Request, res: Response) => {
+  const { scopeId } = req.params;
 
-    const scope = await ScopeService.getScopeById(scopeId);
+  const scope = await Scope.findById(scopeId).populate(
+    "client",
+    "clientName clientEmail"
+  );
 
-    if (!scope || scope.deletedAt) {
-      throw new AppError("Scope not found or has been deleted", 404);
-    }
-
-    if (scope.status === ScopeStatus.APPROVED) {
-      throw new AppError("Scope has already been approved", 400);
-    }
-
-    scope.status = ScopeStatus.APPROVED;
-    await scope.save();
-
-    return sendSuccess({
-      res,
-      message: "Scope invite accepted successfully",
-      data: { scope },
-    });
+  if (!scope || scope.deletedAt) {
+    throw new AppError("Scope not found or has been deleted", 404);
   }
-);
 
-export const rejectScopeInvite = catchAsync(
-  async (req: Request, res: Response) => {
-    const { scopeId } = req.params;
-    const { reason, message } = req.body;
+  if (scope.status === ScopeStatus.APPROVED) {
+    throw new AppError("Scope has already been approved", 400);
+  }
 
-    const scope = await Scope.findById(scopeId).populate(
-      "client",
-      "clientName clientEmail"
-    );
-    if (!scope || scope.deletedAt) {
-      throw new AppError("Scope not found or has been deleted", 404);
-    }
+  if (scope.status === ScopeStatus.REJECTED) {
+    throw new AppError("Rejected scopes cannot be approved", 400);
+  }
 
-    if (scope.status === ScopeStatus.REJECTED) {
-      throw new AppError("Scope has already been rejected", 400);
-    }
+  scope.status = ScopeStatus.APPROVED;
+  scope.rejectionReason = undefined;
+  scope.rejectionMessage = undefined;
 
-    scope.status = ScopeStatus.REJECTED;
-    scope.rejectionReason = reason;
-    scope.rejectionMessage = message;
+  await scope.save();
 
-    await scope.save();
+  if (
+    !scope.client ||
+    typeof scope.client !== "object" ||
+    !("clientName" in scope.client) ||
+    !("clientEmail" in scope.client)
+  ) {
+    throw new AppError("Invalid client data in scope", 500);
+  }
 
-    if (
-      !scope.client ||
-      typeof scope.client !== "object" ||
-      !("clientName" in scope.client) ||
-      !("clientEmail" in scope.client)
-    ) {
-      throw new AppError("Invalid client data in scope", 500);
-    }
-    const { clientName, clientEmail } = scope.client as {
-      clientName: string;
-      clientEmail: string;
-    };
+  const { clientName, clientEmail } = scope.client;
 
-    await sendScopeRejectionEmail({
-      clientEmail,
-      clientName,
-      projectTitle: scope.projectTitle,
-      scopeTitle: scope.natureOfWork,
-      rejectionReason: scope.rejectionReason!,
-      rejectionMessage: scope.rejectionMessage,
-    });
+  await sendScopeApprovalEmail({
+    clientName,
+    clientEmail,
+    projectTitle: scope.projectTitle,
+    scopeTitle: scope.natureOfWork,
+  } as ScopeApprovalEmailOptions);
 
-    return sendSuccess({
-      res,
-      message: "Scope has been rejected successfully",
-      data: {
-        scope: { scopeId: scope.scopeId, reason, message },
+  return sendSuccess({
+    res,
+    message: "Scope has been accepted successfully",
+    data: {
+      scope: {
+        scopeId: scope._id,
+        status: scope.status,
+        projectTitle: scope.projectTitle,
+        natureOfWork: scope.natureOfWork,
+        clientName,
       },
-    });
+    },
+  });
+});
+
+export const rejectScope = catchAsync(async (req: Request, res: Response) => {
+  const { scopeId } = req.params;
+  const { reason, message } = req.body;
+
+  const scope = await Scope.findById(scopeId).populate(
+    "client",
+    "clientName clientEmail"
+  );
+  if (!scope || scope.deletedAt) {
+    throw new AppError("Scope not found or has been deleted", 404);
   }
-);
+
+  if (scope.status === ScopeStatus.REJECTED) {
+    throw new AppError("Scope has already been rejected", 400);
+  }
+
+  scope.status = ScopeStatus.REJECTED;
+  scope.rejectionReason = reason;
+  scope.rejectionMessage = message;
+
+  await scope.save();
+
+  if (
+    !scope.client ||
+    typeof scope.client !== "object" ||
+    !("clientName" in scope.client) ||
+    !("clientEmail" in scope.client)
+  ) {
+    throw new AppError("Invalid client data in scope", 500);
+  }
+  const { clientName, clientEmail } = scope.client as {
+    clientName: string;
+    clientEmail: string;
+  };
+
+  await sendScopeRejectionEmail({
+    clientEmail,
+    clientName,
+    projectTitle: scope.projectTitle,
+    scopeTitle: scope.natureOfWork,
+    rejectionReason: scope.rejectionReason!,
+    rejectionMessage: scope.rejectionMessage,
+  });
+
+  return sendSuccess({
+    res,
+    message: "Scope has been rejected successfully",
+    data: {
+      scope: { scopeId: scope.scopeId, reason, message },
+    },
+  });
+});
 
 export const getScopeStatsController = catchAsync(
   async (_req: Request, res: Response) => {
@@ -231,6 +266,31 @@ export const listScopes = catchAsync(async (req: Request, res: Response) => {
     status: "success",
     message: "List of scopes",
     pagination,
+    results: scopes.length,
+    data: { scopes },
+  });
+});
+
+export const searchScopes = catchAsync(async (req: Request, res: Response) => {
+  const keyword = req.query.q as string;
+
+  const scopes = await search({
+    model: Scope,
+    keyword,
+    searchFields: [
+      "projectTitle",
+      "scopeId",
+      "client.clientName",
+      "client.clientBusinessName",
+    ],
+    populateFields: ["client"],
+    selectFields:
+      "projectTitle scopeId status createdAt client.clientName client.clientBusinessName",
+  });
+
+  return sendSuccess({
+    res,
+    message: "Scope search results",
     results: scopes.length,
     data: { scopes },
   });

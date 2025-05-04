@@ -22,7 +22,7 @@ export interface IScope {
 
 export interface IScopeDocument extends IScope, Document {}
 
-export interface ResendScopeInviteOptions {
+export interface ResendScopeApprovalOptions {
   admin: {
     fullName: string;
     email: string;
@@ -32,7 +32,7 @@ export interface ResendScopeInviteOptions {
   acceptLink: string;
 }
 
-export interface ScopeInviteOptions {
+export interface ScopeApprovalOptions {
   admin: {
     fullName: string;
     email: string;
@@ -40,4 +40,17 @@ export interface ScopeInviteOptions {
   projectTitle: string;
   scopeTitle: string;
   acceptLink: string;
+}
+
+interface SiteVisitRequestEmailOptions {
+  fullName: string;
+  clientName: string;
+  clientRepresentative: string;
+  contactMethod: string;
+  siteVisitDate: string;
+  siteVisitTime: string;
+  projectTitle: string;
+  adminEmail: string;
+  dashboardUrl: string;
+  year: number;
 }

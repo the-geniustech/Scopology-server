@@ -1,0 +1,50 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Scope Approved</title>
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; } .container {
+      max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee;
+      border-radius: 8px; } .logo { text-align: center; margin-bottom: 20px; }
+      .logo img { width: 120px; } .highlight { color:
+      {{primaryColor}}; font-weight: bold; } .footer { font-size: 12px; color:
+      #888; margin-top: 30px; text-align: center; }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="{{logoUrl}}" alt="Scopology Logo" />
+      </div>
+
+      <p>Hi {{clientName}},</p>
+
+      <p>
+        We’re excited to let you know that your scope
+        <strong>"{{scopeTitle}}"</strong>
+        under the project
+        <strong>"{{projectTitle}}"</strong>
+        has been
+        <span class="highlight">approved</span>.
+      </p>
+
+      <p>
+        Thank you for your submission. Our team will continue with next steps
+        based on this scope.
+      </p>
+
+      <p>
+        If you have any questions, feel free to reach out.
+      </p>
+
+      <p>Best regards,<br />The Scopology Team</p>
+
+      <div class="footer">
+        &copy;
+        {{year}}
+        Scopology. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

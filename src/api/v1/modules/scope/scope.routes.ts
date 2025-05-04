@@ -18,6 +18,7 @@ router
   )
   .get(ScopeController.listScopes);
 
+router.get("/search", ScopeController.searchScopes);
 router.get("/stats", ScopeController.getScopeStatsController);
 
 router
@@ -28,12 +29,12 @@ router
 
 router
   .route("/:scopeId/resend-request")
-  .post(ScopeController.resendScopeInvite);
+  .post(ScopeController.resendScopeApproval);
 
-router.route("/:scopeId/accept").patch(ScopeController.acceptScopeInvite);
+router.route("/:scopeId/accept").patch(ScopeController.approveScope);
 
 router
   .route("/:scopeId/reject")
-  .patch(validateRejectScope, ScopeController.rejectScopeInvite);
+  .patch(validateRejectScope, ScopeController.rejectScope);
 
 export default router;
