@@ -3,10 +3,13 @@ import { ObjectId } from "mongoose";
 export interface ISiteVisit extends Document {
   projectId: ObjectId;
   clientRepresentative: string;
-  contactMethod: "phone" | "email" | "in_person" | "whatsapp" | "other";
-  siteVisitAt: Date;
+  contactMethod: string;
+  clientRepPhone: string;
+  clientRepEmail: string;
+  siteVisitDate: Date;
+  siteVisitTime: string; // HH:mm format
   commuteTimeMinutes: number;
-  status: "scheduled" | "done" | "cancelled";
+  status: "pending" | "scheduled" | "done" | "cancelled";
   acceptedBy?: ObjectId | string;
   acceptedAt?: Date;
   notes?: string;

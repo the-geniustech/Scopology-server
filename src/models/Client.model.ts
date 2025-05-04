@@ -49,6 +49,7 @@ const clientSchema = new Schema<IClient>(
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 

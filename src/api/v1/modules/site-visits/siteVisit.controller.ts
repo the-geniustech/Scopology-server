@@ -11,6 +11,7 @@ import {
 import { findSuperAdmin } from "@modules/auth/auth.service";
 import { sendSiteVisitRequestEmail } from "@services/mail/templates/sendSiteVisitRequestEmail";
 import { contactMethodMap } from "@constants/siteVisit";
+import Project from "@models/Project.model";
 
 export const createSiteVisitController = catchAsync(
   async (req: Request, res: Response) => {
@@ -25,11 +26,24 @@ export const createSiteVisitController = catchAsync(
     const project = await Project.findById(siteVisit.projectId).populate(
       "client"
     );
-    const clientName = project?.client?.name || "Unknown Client";
-    const projectTitle = project?.name || "Untitled Project";
+
+    if (!project || project.deletedAt) {
+      throw new AppError("Project not found", 404);
+    }
+
+    if (
+      !project.client ||
+      typeof project.client !== "object" ||
+      !("clientName" in project.client) ||
+      !("clientEmail" in project.client)
+    ) {
+      throw new AppError("Invalid client data in project", 500);
+    }
+
+    const { clientName } = project.client;
 
     // 📅 Format siteVisitAt
-    const visitDateObj = new Date(siteVisit.siteVisitAt);
+    const visitDateObj = new Date(siteVisit.siteVisitDate);
     const siteVisitDate = visitDateObj.toLocaleDateString(undefined, {
       weekday: "long",
       year: "numeric",
@@ -49,8 +63,8 @@ export const createSiteVisitController = catchAsync(
 
     sendSiteVisitRequestEmail({
       fullName: admin.fullName,
-      clientName,
-      projectTitle,
+      clientName: clientName as string,
+      projectTitle: project.title,
       clientRepresentative: siteVisit.clientRepresentative,
       contactMethod: readableContactMethod,
       siteVisitDate,
@@ -99,7 +113,7 @@ export const acceptSiteVisitController = catchAsync(
     siteVisit.acceptedAt = new Date();
     await siteVisit.save();
 
-    const visitDateObj = new Date(siteVisit.siteVisitAt);
+    const visitDateObj = new Date(siteVisit.siteVisitDate);
     const siteVisitDate = visitDateObj.toLocaleDateString(undefined, {
       weekday: "long",
       year: "numeric",
