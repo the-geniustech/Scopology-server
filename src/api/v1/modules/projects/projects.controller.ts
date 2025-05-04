@@ -10,7 +10,7 @@ import { IProject } from "@interfaces/project.interface";
  * POST /api/v1/projects
  * Create a new project
  */
-export const createProjectController = catchAsync(
+export const createProject = catchAsync(
   async (req: Request, res: Response) => {
     const user = req.user as any;
 
@@ -36,7 +36,7 @@ export const createProjectController = catchAsync(
  * GET /api/v1/projects/:id
  * Get a single project by ID
  */
-export const getProjectController = catchAsync(
+export const getProject = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const project = await projectService.getProjectById(id);
