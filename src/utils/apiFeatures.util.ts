@@ -1,6 +1,6 @@
-import { Query, Document, PopulateOptions } from "mongoose";
+import { Query, Document, Model } from "mongoose";
 import { URLSearchParams } from "url";
-import { ParsedQs } from "qs";
+import AppError from "./appError";
 
 export class APIFeatures<T> {
   private query: Query<T[], T>;
@@ -109,146 +109,65 @@ export class APIFeatures<T> {
   }
 }
 
-type PopulateConfig = {
-  path: string;
-  select?: string;
-  match?: Record<string, any>;
-};
+interface QueryString {
+  [key: string]: any;
+}
 
-export class AdvancedAPIFeatures<T> {
+interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  next?: string;
+  prev?: string;
+}
+
+export class AdvancedAPIFeatures<T extends Document> {
   private query: Query<T[], T>;
-  private queryString: Record<string, any>;
+  private model: Model<T>;
+  private queryString: QueryString;
   private page = 1;
   private limit = 20;
-  private baseFilter: Record<string, any> = {};
-  private populates: PopulateConfig[] = [];
+  private baseUrl = "";
+  private rootSelect = "";
+  private populates: { path: string; select?: string }[] = [];
 
-  constructor(query: Query<T[], T>, queryString: Record<string, any>) {
+  constructor(model: Model<T>, query: Query<T[], T>, queryString: QueryString) {
     this.query = query;
+    this.model = model;
     this.queryString = queryString;
   }
 
-  filter() {
-    const excluded = ["page", "sort", "limit", "fields"];
-    const baseQuery: Record<string, any> = {};
-    const refMatch: Record<string, Record<string, any>> = {};
-
-    for (const key in this.queryString) {
-      if (excluded.includes(key)) continue;
-
-      // Handle nested filters e.g. scope[status]=pending
-      if (key.includes("[")) {
-        const [ref, field] = key.split(/\[|\]/).filter(Boolean);
-        if (!refMatch[ref]) refMatch[ref] = {};
-        refMatch[ref][field] = this.queryString[key];
-      } else {
-        baseQuery[key] = this.queryString[key];
-      }
-    }
-
-    this.baseFilter = baseQuery;
-
-    // Store match conditions to apply during .populate()
-    for (const ref in refMatch) {
-      this.populates.push({
-        path: ref,
-        match: refMatch[ref],
-      });
-    }
-
-    return this;
-  }
-
-  sort() {
-    if (this.queryString.sort) {
-      const sortBy = this.queryString.sort.split(",").join(" ");
-      this.query = this.query.sort(sortBy);
-    } else {
-      this.query = this.query.sort("-createdAt");
-    }
-
-    return this;
-  }
-
-  limitFields() {
-    const baseFields = this.queryString.fields;
-    const nestedFields: Record<string, string> = {};
-
-    // Handle fields[scope]=scopeTitle,status
-    for (const key in this.queryString) {
-      const match = key.match(/^fields\[(\w+)]$/);
-      if (match) {
-        const ref = match[1];
-        nestedFields[ref] = this.queryString[key].split(",").join(" ");
-      }
-    }
-
-    // Base fields
-    if (baseFields && typeof baseFields === "string") {
-      const selectFields = baseFields.split(",").join(" ");
-      this.query = this.query.select(selectFields);
-    } else {
-      this.query = this.query.select("-__v");
-    }
-
-    // Merge field selections into populates
-    this.populates = this.populates.map((p) => ({
-      ...p,
-      select: nestedFields[p.path] || p.select,
-    }));
-
-    return this;
-  }
-
-  paginate() {
-    this.page = parseInt(this.queryString.page, 10) || 1;
-    this.limit = parseInt(this.queryString.limit, 10) || 20;
-    const skip = (this.page - 1) * this.limit;
-
-    this.query = this.query.skip(skip).limit(this.limit);
-    return this;
-  }
-
-  populate() {
-    this.populates.forEach((p) => {
-      this.query = this.query.populate(p);
-    });
-    return this;
-  }
-
-  async applyAll(baseUrl: string): Promise<{
+  async applyAll(baseUrl?: string): Promise<{
     data: T[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      pages: number;
-      next?: string;
-      prev?: string;
-    };
+    pagination: PaginationMeta;
   }> {
-    // Apply query features
+    if (baseUrl) this.baseUrl = baseUrl;
+
     this.filter().sort().limitFields().paginate().populate();
 
-    const countQuery = this.query.model.countDocuments(this.baseFilter);
-    const [results, total] = await Promise.all([this.query, countQuery]);
+    const [results, total] = await Promise.all([
+      this.query,
+      this.model.countDocuments(this.query.getFilter()),
+    ]);
 
     const pages = Math.ceil(total / this.limit);
-    const queryParams = new URLSearchParams(this.queryString as any);
+
+    const queryParams = new URLSearchParams(this.queryString);
     queryParams.set("limit", String(this.limit));
 
     const next =
       this.page < pages
-        ? `${baseUrl}?${queryParams.toString().replace(/page=\d+/, "")}&page=${
-            this.page + 1
-          }`
+        ? `${this.baseUrl}?${queryParams
+            .toString()
+            .replace(/page=\d+/, "")}&page=${this.page + 1}`
         : undefined;
 
     const prev =
       this.page > 1
-        ? `${baseUrl}?${queryParams.toString().replace(/page=\d+/, "")}&page=${
-            this.page - 1
-          }`
+        ? `${this.baseUrl}?${queryParams
+            .toString()
+            .replace(/page=\d+/, "")}&page=${this.page - 1}`
         : undefined;
 
     return {
@@ -262,5 +181,83 @@ export class AdvancedAPIFeatures<T> {
         prev,
       },
     };
+  }
+
+  private filter() {
+    const filterQuery = { ...this.queryString };
+    const excluded = ["sort", "page", "limit", "fields"];
+
+    Object.keys(filterQuery).forEach((key) => {
+      if (excluded.includes(key) || key.startsWith("fields")) return;
+
+      // Handle nested filters like client[clientName] or scope[status]
+      const realKey = key.replace(/\[(.+?)\]/g, ".$1");
+      const value = filterQuery[key];
+
+      try {
+        this.query = this.query.find({
+          ...this.query.getFilter(),
+          [realKey]: value,
+        });
+      } catch (err) {
+        throw new AppError(`Invalid filter on field '${realKey}'`, 400);
+      }
+    });
+
+    return this;
+  }
+
+  private sort() {
+    if (this.queryString.sort) {
+      const sortBy = this.queryString.sort
+        .split(",")
+        .map((field: string) => field.replace(/\[(.+?)\]/g, ".$1"))
+        .join(" ");
+
+      this.query = this.query.sort(sortBy);
+    } else {
+      this.query = this.query.sort("-createdAt");
+    }
+    return this;
+  }
+
+  private limitFields() {
+    const rootFields = this.queryString.fields;
+    if (typeof rootFields === "string") {
+      this.rootSelect = rootFields.split(",").join(" ");
+      this.query = this.query.select(this.rootSelect);
+    }
+
+    for (const key in this.queryString) {
+      const match = key.match(/^fields\[(.+?)\]$/);
+      if (match) {
+        const path = match[1];
+        const select = this.queryString[key];
+        if (typeof select === "string") {
+          this.populates.push({
+            path,
+            select: select.split(",").join(" "),
+          });
+        }
+      }
+    }
+
+    return this;
+  }
+
+  private paginate() {
+    this.page = parseInt(this.queryString.page, 10) || 1;
+    this.limit = parseInt(this.queryString.limit, 10) || 20;
+    const skip = (this.page - 1) * this.limit;
+
+    this.query = this.query.skip(skip).limit(this.limit);
+    return this;
+  }
+
+  private populate() {
+    for (const pop of this.populates) {
+      this.query = this.query.populate({ ...pop, strictPopulate: false });
+    }
+    return this;
   }
 }

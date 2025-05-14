@@ -59,7 +59,7 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
   );
   const populatedScope = await scope.populate(
     "client addedBy",
-    "clientName clientLogo clientPhone clientEmail clientNatureOfBusiness fullName email"
+    "clientName clientLogo clientPhone clientEmail clientType fullName email"
   );
 
   await ScopeService.notifyAdminOnScopeCreation(populatedScope);
@@ -260,7 +260,7 @@ export const listScopes = catchAsync(async (req: Request, res: Response) => {
   const features = new APIFeatures(
     Scope.find({ deletedAt: null }).populate(
       "client addedBy",
-      "clientName clientLogo clientPhone clientEmail clientNatureOfBusiness fullName email"
+      "clientName clientLogo clientPhone clientEmail clientType fullName email"
     ),
     req.query
   );

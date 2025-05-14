@@ -82,7 +82,7 @@ export const getProjectStats = catchAsync(
 //         .populate({
 //           path: "client",
 //           select:
-//             "clientName clientPhone clientEmail clientLogo clientNatureOfBusiness",
+//             "clientName clientPhone clientEmail clientLogo clientType",
 //         })
 //         .populate({
 //           path: "scope",
@@ -108,63 +108,10 @@ export const getProjectStats = catchAsync(
 // );
 export const getAllProjects = catchAsync(
   async (req: Request, res: Response) => {
-    // const baseUrl = `${req.baseUrl}${req.path}`;
-
-    // const features = new AdvancedAPIFeatures(
-    //   Project.find().populate("client scope"),
-    //   req.query
-    // );
-    // const { data: projects, pagination } =
-    //   await features.applyAllFiltersWithPaginationMeta(req.originalUrl);
-
-    // const query = Project.find().populate([
-    //   { path: "client" },
-    //   { path: "scope", select: "-client" },
-    // ]);
-    // const query = Project.find().populate([
-    //   { path: "client", select: "clientName clientNatureOfBusiness" },
-    //   { path: "scope", select: "scopeTitle status" },
-    // ]);
-
-    // const features = new AdvancedAPIFeatures(query, req.query);
-    // const result = await features.applyAllFiltersWithPaginationMeta(
-    //   req.baseUrl
-    // );
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   ...result,
-    // });
-
-    // const baseUrl = `${req.baseUrl}${req.path}`;
-    // const features = new AdvancedAPIFeatures(
-    //   Project.find().populate([
-    //     { path: "client" },
-    //     { path: "scope", select: "-client" },
-    //   ]),
-    //   req.query
-    // );
-    // const result = await features.applyAll(baseUrl);
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   ...result,
-    // });
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   message: "List of projects",
-    //   pagination,
-    //   results: projects.length,
-    //   data: { projects },
-    // });
-
     const baseUrl = `${req.baseUrl}${req.path}`;
-    const query = Project.find({ deletedAt: null }).populate([
-      { path: "client" },
-      { path: "scope", select: "-client" },
-    ]); // Always provide your base query
-    const features = new AdvancedAPIFeatures(query, req.query);
+    const query = Project.find({ deletedAt: null });
+    const features = new AdvancedAPIFeatures(Project, query, req.query);
+
     const { data: projects, pagination } = await features.applyAll(baseUrl);
 
     return res.status(200).json({
@@ -185,7 +132,7 @@ export const searchProjects = catchAsync(
       searchFields: ["scope.scopeTitle", "projectId", "client.clientName"],
       populateFields: ["client", "scope"],
       selectFields:
-        "-scope.client projectId status createdAt client.clientName client.clientPhone client.clientEmail client.clientLogo client.clientNatureOfBusiness",
+        "-scope.client projectId status createdAt client.clientName client.clientPhone client.clientEmail client.clientLogo client.clientType",
     });
 
     return sendSuccess({

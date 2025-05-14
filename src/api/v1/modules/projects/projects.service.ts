@@ -11,7 +11,7 @@ export const populateProject = async (id: string) => {
   const project = await Project.findOne({ _id: id, deletedAt: null })
     .populate(
       "client",
-      "clientName clientLogo clientPhone clientEmail clientNatureOfBusiness"
+      "clientName clientLogo clientPhone clientEmail clientType"
     )
     .populate("scope", "-client");
   // .populate("createdBy", "fullName email phoneNumber");
@@ -24,19 +24,6 @@ export const createProject = async (
   data: Partial<IProject>,
   createdBy: IUserDocument
 ) => {
-  // const existing = await Project.findOne({
-  //   title: data.title,
-  //   client: data.client,
-  //   deletedAt: null,
-  // });
-
-  // if (existing) {
-  //   throw new AppError(
-  //     "A project with the same title already exists for this client.",
-  //     409
-  //   );
-  // }
-
   const newProject = await Project.create({
     ...data,
     createdBy: createdBy.id,
@@ -57,7 +44,7 @@ export const createProject = async (
   sendProjectCreationEmail({
     admin,
     projectName: project.title,
-    description: project.description,
+    description: project.category,
     createdBy: { fullName: createdBy.fullName },
     projectId: project.id.toString(),
   });

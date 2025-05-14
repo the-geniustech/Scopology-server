@@ -10,7 +10,7 @@ export interface IClient extends Document {
   clientPhone: string;
   clientPurchaseNumber: string;
   clientEmail: string;
-  clientNatureOfBusiness: ClientType;
+  clientType: ClientType;
   clientBio?: string;
   clientLogo?: {
     url: string;

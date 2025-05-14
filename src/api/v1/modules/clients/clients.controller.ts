@@ -50,13 +50,9 @@ export const searchUsers = catchAsync(async (req: Request, res: Response) => {
   const clients = await search({
     model: Client,
     keyword,
-    searchFields: [
-      "clientName",
-      "clientPhone",
-      "clientEmail",
-    ],
+    searchFields: ["clientName", "clientPhone", "clientEmail"],
     selectFields:
-      "clientName clientPhone clientEmail createdAt clientLogo clientNatureOfBusiness",
+      "clientName clientPhone clientEmail createdAt clientLogo clientType",
   });
 
   return sendSuccess({

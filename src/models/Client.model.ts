@@ -30,7 +30,7 @@ const clientSchema = new Schema<IClient>(
       lowercase: true,
       unique: true,
     },
-    clientNatureOfBusiness: {
+    clientType: {
       type: String,
       enum: Object.values(ClientType),
       required: true,

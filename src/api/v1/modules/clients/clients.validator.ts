@@ -19,7 +19,7 @@ export const createClientSchema = z.object({
   clientEmail: z
     .string()
     .email({ message: "Please provide a valid email address" }),
-  clientNatureOfBusiness: clientTypeEnum,
+  clientType: clientTypeEnum,
   clientBio: z
     .string()
     .min(5, { message: "About should not be less than 5 characters" })
