@@ -117,10 +117,10 @@ export const getAllProjects = catchAsync(
     // const { data: projects, pagination } =
     //   await features.applyAllFiltersWithPaginationMeta(req.originalUrl);
 
-    const query = Project.find().populate([
-      { path: "client" },
-      { path: "scope", select: "-client" },
-    ]);
+    // const query = Project.find().populate([
+    //   { path: "client" },
+    //   { path: "scope", select: "-client" },
+    // ]);
     // const query = Project.find().populate([
     //   { path: "client", select: "clientName clientNatureOfBusiness" },
     //   { path: "scope", select: "scopeTitle status" },
@@ -136,20 +136,20 @@ export const getAllProjects = catchAsync(
     //   ...result,
     // });
 
-    const baseUrl = `${req.baseUrl}${req.path}`;
-    const features = new AdvancedAPIFeatures(
-      Project.find().populate([
-        { path: "client" },
-        { path: "scope", select: "-client" },
-      ]),
-      req.query
-    );
-    const result = await features.applyAll(baseUrl);
+    // const baseUrl = `${req.baseUrl}${req.path}`;
+    // const features = new AdvancedAPIFeatures(
+    //   Project.find().populate([
+    //     { path: "client" },
+    //     { path: "scope", select: "-client" },
+    //   ]),
+    //   req.query
+    // );
+    // const result = await features.applyAll(baseUrl);
 
-    return res.status(200).json({
-      status: "success",
-      ...result,
-    });
+    // return res.status(200).json({
+    //   status: "success",
+    //   ...result,
+    // });
 
     // return res.status(200).json({
     //   status: "success",
@@ -158,6 +158,20 @@ export const getAllProjects = catchAsync(
     //   results: projects.length,
     //   data: { projects },
     // });
+
+    const baseUrl = `${req.baseUrl}${req.path}`;
+    const query = Project.find({ deletedAt: null }).populate([
+      { path: "client" },
+      { path: "scope", select: "-client" },
+    ]); // Always provide your base query
+    const features = new AdvancedAPIFeatures(query, req.query);
+    const { data: projects, pagination } = await features.applyAll(baseUrl);
+
+    return res.status(200).json({
+      status: "success",
+      data: projects,
+      pagination,
+    });
   }
 );
 
