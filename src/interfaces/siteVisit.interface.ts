@@ -2,17 +2,14 @@ import { ObjectId } from "mongoose";
 
 export interface ISiteVisit extends Document {
   projectId: ObjectId;
-  clientRepresentative: string;
+  clientRepresentative: ObjectId;
   contactMethod: string;
-  clientRepPhone: string;
-  clientRepEmail: string;
   siteVisitDate: Date;
   siteVisitTime: string; // HH:mm format
-  commuteTimeMinutes: number;
+  commuteTime: string;
   status: "pending" | "scheduled" | "done" | "cancelled";
   acceptedBy?: ObjectId | string;
   acceptedAt?: Date;
-  notes?: string;
   addedBy: ObjectId;
   deletedAt?: Date | null;
   createdAt: Date;
@@ -22,11 +19,11 @@ export interface ISiteVisit extends Document {
 export interface SiteVisitRequestEmailOptions {
   fullName: string;
   clientName: string;
-  clientRepresentative: string;
+  clientRepresentativeName: string;
   contactMethod: string;
   siteVisitDate: string;
   siteVisitTime: string;
-  projectTitle: string;
+  projectTitle?: string;
   adminEmail: string;
   dashboardUrl: string;
   year: number;

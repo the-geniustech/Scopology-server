@@ -5,10 +5,10 @@ export enum ClientType {
 }
 
 export interface IClient extends Document {
-  clientBusinessName: string;
   clientName: string;
   clientAddress: string;
   clientPhone: string;
+  clientPurchaseNumber: string;
   clientEmail: string;
   clientNatureOfBusiness: ClientType;
   clientBio?: string;

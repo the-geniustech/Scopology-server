@@ -4,6 +4,9 @@ import { validate } from "@middlewares/validate.middleware";
 export const signupSuperAdminSchema = z.object({
   fullName: z.string().min(3),
   email: z.string().email(),
+  phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+    message: "Please provide a valid phone number",
+  }),
   password: z.string().min(6),
   setupSecret: z.string().min(8, "Setup secret is required"),
 });
@@ -11,6 +14,9 @@ export const signupSuperAdminSchema = z.object({
 const inviteUserSchema = z.object({
   fullName: z.string().min(3, "Full name is required"),
   email: z.string().email("Valid email is required"),
+  phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+    message: "Please provide a valid phone number",
+  }),
   roles: z
     .array(z.enum(["administrator", "supervisor"]))
     .min(1, "At least one role must be assigned"),

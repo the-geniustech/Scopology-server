@@ -63,7 +63,7 @@ export const notifyAdminOnScopeCreation = async (scope: IScopeDocument) => {
 
 export const getScopeStats = async () => {
   const result = await Scope.aggregate([
-    { $match: { deletedAt: null } }, // exclude soft-deleted scopes
+    { $match: { deletedAt: null } },
     {
       $facet: {
         total: [{ $count: "count" }],
@@ -86,16 +86,13 @@ export const getScopeStats = async () => {
 };
 
 export const getScopeById = async (id: string) => {
-  return await Scope.findById(id).populate(
-    "client addedBy",
-    "clientBusinessName clientName clientLogo fullName email "
-  );
+  return await Scope.findById(id);
 };
 
 export const listScopes = async () => {
   return await Scope.find({ deletedAt: null }).populate(
     "client addedBy",
-    "clientBusinessName clientName clientLogo fullName email "
+    "clientName clientLogo fullName email "
   );
 };
 

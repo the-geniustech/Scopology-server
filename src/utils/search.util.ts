@@ -26,7 +26,6 @@ export const search = async <T>({
   const orConditions = searchFields.map((field) => {
     const fieldParts = field.split(".");
     if (fieldParts.length > 1) {
-      // For populated fields (e.g., client.clientName), we use dot notation in $expr
       return {
         $expr: {
           $regexMatch: {
@@ -49,7 +48,7 @@ export const search = async <T>({
   for (const field of populateFields) {
     pipeline.push({
       $lookup: {
-        from: field + "s", // assuming plural collection names (e.g. 'clients')
+        from: field + "s",
         localField: field,
         foreignField: "_id",
         as: field,

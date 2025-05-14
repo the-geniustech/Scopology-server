@@ -5,6 +5,8 @@ export interface IUserDocument extends Document {
   userId: string;
   fullName: string;
   email: string;
+  phoneNumber: string;
+  avatar?: { url: string; publicId: string };
   password: string;
   roles: ("administrator" | "supervisor" | "super_admin")[];
   status: "pending" | "active" | "disabled";

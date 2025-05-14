@@ -1,13 +1,12 @@
 import { sendEmail } from "../index";
 import { renderTemplate } from "../renderTemplate";
-import { EmailPayload } from "@interfaces/mail.interface";
 
 export interface ScopeApprovalEmailOptions {
   admin: { fullName: string; email: string };
   clientName: string;
   clientEmail: string;
   scopeTitle: string;
-  projectTitle: string;
+  projectTitle?: string;
   acceptLink: string;
 }
 
@@ -33,5 +32,5 @@ export const sendScopeApprovalEmail = async ({
     html,
   };
 
-  await sendEmail(payload as EmailPayload);
+  await sendEmail(payload);
 };

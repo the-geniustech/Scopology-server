@@ -1,8 +1,14 @@
 import { Router } from "express";
 import * as UserController from "./users.controller";
-import { validateUserUpdate } from "./users.validator";
+import {
+  validateUserPasswordUpdate,
+  validateUserProfileUpdate,
+} from "./users.validator";
 import { protect, restrictedTo } from "@middlewares/auth.middleware";
 import { UserRole } from "@constants/roles";
+import { uploadSingle } from "@middlewares/fileUpload.middleware";
+import User from "@models/User.model";
+import { uploadToCloudinary } from "@middlewares/uploadToCloudinary.middleware";
 
 const router = Router();
 
@@ -13,6 +19,26 @@ router.route("/").get(UserController.getAllUsers);
 router.get("/preview/next-id", UserController.previewNextUserId);
 
 router.get("/stats", UserController.getUserStatsController);
+
+router.patch(
+  "/update-profile",
+  uploadSingle("avatar"),
+  uploadToCloudinary({
+    fieldName: "avatar",
+    baseFolder: "users",
+    subFolder: "avatars",
+    deleteExisting: true,
+    collectionName: "user",
+    model: User,
+  }),
+  validateUserProfileUpdate,
+  UserController.updateProfile
+);
+router.patch(
+  "/update-password",
+  validateUserPasswordUpdate,
+  UserController.updatePassword
+);
 
 router.get(
   "/search",
@@ -37,7 +63,7 @@ router
   .route("/:id")
   .patch(
     restrictedTo(UserRole.ADMINISTRATOR),
-    validateUserUpdate,
+    validateUserProfileUpdate,
     UserController.updateUser
   )
   .delete(restrictedTo(UserRole.ADMINISTRATOR), UserController.deleteUser);

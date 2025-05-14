@@ -1,11 +1,10 @@
-import { EmailPayload } from "@interfaces/mail.interface";
 import { renderTemplate } from "../renderTemplate";
 import { sendEmail } from "..";
 import { SiteVisitRequestEmailOptions } from "@interfaces/siteVisit.interface";
 
 export const sendSiteVisitRequestEmail = async ({
   clientName,
-  clientRepresentative,
+  clientRepresentativeName,
   contactMethod,
   siteVisitDate,
   siteVisitTime,
@@ -15,7 +14,7 @@ export const sendSiteVisitRequestEmail = async ({
 }: SiteVisitRequestEmailOptions): Promise<void> => {
   const html = await renderTemplate("siteVisitRequest", {
     clientName,
-    clientRepresentative,
+    clientRepresentativeName,
     contactMethod,
     siteVisitDate,
     siteVisitTime,
@@ -30,5 +29,5 @@ export const sendSiteVisitRequestEmail = async ({
     html,
   };
 
-  await sendEmail(payload as EmailPayload);
+  await sendEmail(payload);
 };

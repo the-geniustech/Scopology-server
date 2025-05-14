@@ -2,19 +2,33 @@ import { z } from "zod";
 import { validate } from "@middlewares/validate.middleware";
 
 export const createProjectSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
-  client: z.string().regex(/^[0-9a-fA-F]{24}$/), // MongoDB ObjectId
-  startDate: z.coerce.date(),
-  endDate: z.coerce.date().optional(),
+  projectId: z
+    .string()
+    .min(4, { message: "Invalid project id, must be at least 4 characters" }),
+  client: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Please provide a valid client Id",
+  }),
+  scope: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Please provide a valid scope Id",
+  }),
+  createdBy: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Please provide a valid createdBy Id",
+  }),
 });
 
 export const updateProjectSchema = z.object({
-  title: z.string().min(3).optional(),
-  description: z.string().min(10).optional(),
+  quotation: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Please provide a valid quotation Id",
+  }),
+  siteVisits: z.array(
+    z.string().regex(/^[0-9a-fA-F]{24}$/, {
+      message: "Please provide a valid site visit Id",
+    })
+  ),
   status: z.enum(["active", "completed", "paused", "cancelled"]).optional(),
+  progress: z.number().optional(),
   startDate: z.coerce.date().optional(),
-  endDate: z.coerce.date().optional(),
+  expectedCompletionDate: z.coerce.date().optional(),
 });
 
 export const validateCreateProject = validate(createProjectSchema);

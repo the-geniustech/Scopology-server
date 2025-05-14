@@ -3,15 +3,23 @@ import { IScopeDocument } from "@interfaces/scope.interface";
 
 const scopeSchema = new Schema<IScopeDocument>(
   {
-    scopeId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     client: {
       type: Schema.Types.ObjectId,
       ref: "Client",
       required: true,
+    },
+    scopeTitle: {
+      type: String,
+      required: true,
+    },
+    scopeOverview: {
+      type: String,
+      required: true,
+    },
+    scopeId: {
+      type: String,
+      required: true,
+      unique: true,
     },
     entryRequirements: {
       type: [String],
@@ -41,6 +49,11 @@ const scopeSchema = new Schema<IScopeDocument>(
     projectDescription: {
       type: String,
       required: true,
+    },
+    progress: {
+      type: Number,
+      required: true,
+      default: 0,
     },
     status: {
       type: String,

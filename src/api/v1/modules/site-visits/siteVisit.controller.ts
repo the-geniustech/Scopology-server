@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { catchAsync } from "@utils/catchAsync";
 import { sendSuccess } from "@utils/responseHandler";
 import * as siteVisitServices from "./siteVisit.service";
+import * as userServices from "../users/users.service";
 import SiteVisit from "@models/SiteVisit.model";
 import AppError from "@utils/appError";
 import {
@@ -12,18 +13,24 @@ import { findSuperAdmin } from "@modules/auth/auth.service";
 import { sendSiteVisitRequestEmail } from "@services/mail/templates/sendSiteVisitRequestEmail";
 import { contactMethodMap } from "@constants/siteVisit";
 import Project from "@models/Project.model";
+import { validateData } from "@middlewares/validate.middleware";
+import {
+  CreateSiteVisitInput,
+  createSiteVisitSchema,
+} from "./siteVisit.validator";
+import { parseTimeString } from "@utils/helpers.util";
 
 export const createSiteVisitController = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
 
-    const siteVisit = await siteVisitServices.createSiteVisit({
-      ...req.body,
-      addedBy: userId,
-    });
+    const clientRepresentative = await userServices.getUserByObjectId(
+      req.body.clientRepresentativeId
+    );
+    if (!clientRepresentative)
+      throw new AppError("clientRepresentative not found", 404);
 
-    // Load additional context (project + client)
-    const project = await Project.findById(siteVisit.projectId).populate(
+    const project = await Project.findById(req.body.projectId).populate(
       "client"
     );
 
@@ -40,9 +47,23 @@ export const createSiteVisitController = catchAsync(
       throw new AppError("Invalid client data in project", 500);
     }
 
-    const { clientName } = project.client;
+    const { hours, minutes } = parseTimeString(req.body.siteVisitTime);
 
-    // 📅 Format siteVisitAt
+    req.body.siteVisitDate = new Date(req.body.siteVisitDate);
+    req.body.siteVisitDate.setUTCHours(hours, minutes, 0, 0);
+    req.body.siteVisitDate = req.body.siteVisitDate.toISOString();
+
+    const payload = validateData(createSiteVisitSchema, {
+      ...req.body,
+      clientRepresentative: clientRepresentative.id,
+      projectId: project.id,
+      addedBy: userId,
+    });
+
+    const siteVisit = await siteVisitServices.createSiteVisit(
+      payload as CreateSiteVisitInput
+    );
+
     const visitDateObj = new Date(siteVisit.siteVisitDate);
     const siteVisitDate = visitDateObj.toLocaleDateString(undefined, {
       weekday: "long",
@@ -58,14 +79,13 @@ export const createSiteVisitController = catchAsync(
     const readableContactMethod =
       contactMethodMap[siteVisit.contactMethod] || siteVisit.contactMethod;
 
-    // 📩 Notify all administrators
     const admin = await findSuperAdmin();
 
     sendSiteVisitRequestEmail({
       fullName: admin.fullName,
-      clientName: clientName as string,
+      clientName: project.client.clientName as string,
       projectTitle: project.title,
-      clientRepresentative: siteVisit.clientRepresentative,
+      clientRepresentativeName: clientRepresentative.fullName,
       contactMethod: readableContactMethod,
       siteVisitDate,
       siteVisitTime,
@@ -78,7 +98,7 @@ export const createSiteVisitController = catchAsync(
       res,
       statusCode: 201,
       message: "Site visit created and email notifications sent to admins",
-      data: siteVisit,
+      data: { siteVisit },
     });
   }
 );
@@ -89,61 +109,56 @@ export const acceptSiteVisitController = catchAsync(
     const adminName = req.user?.fullName || "Admin";
     const { siteVisitId } = req.params;
 
-    const siteVisit = await SiteVisit.findOne({
-      _id: siteVisitId,
-      deletedAt: null,
-    })
-      .populate({
-        path: "addedBy",
-        select: "fullName email",
-        model: "User",
-      })
-      .populate({
-        path: "projectId",
-        select: "name",
-        model: "Project",
-      });
-
+    const siteVisit = await SiteVisit.findById(siteVisitId).populate({
+      path: "clientRepresentative",
+      select: "fullName email",
+    });
     if (!siteVisit) throw new AppError("Site visit not found", 404);
     if (siteVisit.status === "done")
       throw new AppError("Already accepted", 400);
 
-    siteVisit.status = "done";
-    siteVisit.acceptedBy = adminId;
-    siteVisit.acceptedAt = new Date();
-    await siteVisit.save();
+    const project = await Project.findById(siteVisit.projectId).populate({
+      path: "scope",
+      select: "title",
+    });
 
-    const visitDateObj = new Date(siteVisit.siteVisitDate);
-    const siteVisitDate = visitDateObj.toLocaleDateString(undefined, {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    const siteVisitTime = visitDateObj.toLocaleTimeString(undefined, {
-      hour: "numeric",
-    });
+    if (!project || project.deletedAt) {
+      throw new AppError("Project not found", 404);
+    }
 
     if (
-      !siteVisit.addedBy ||
-      typeof siteVisit.addedBy !== "object" ||
-      !("fullName" in siteVisit.addedBy) ||
-      !("email" in siteVisit.addedBy)
+      !project.scope ||
+      typeof project.scope !== "object" ||
+      !("scopeTitle" in project.scope)
+    ) {
+      throw new AppError("Invalid client data in project", 500);
+    }
+
+    siteVisit.status = "scheduled";
+    siteVisit.acceptedBy = adminId;
+    siteVisit.acceptedAt = new Date();
+    await siteVisit.save({ validateModifiedOnly: true });
+
+    project.siteVisits?.push(siteVisit.id);
+    await project.save({ validateModifiedOnly: true });
+
+    if (
+      !siteVisit.clientRepresentative ||
+      typeof siteVisit.clientRepresentative !== "object" ||
+      !("fullName" in siteVisit.clientRepresentative) ||
+      !("email" in siteVisit.clientRepresentative)
     ) {
       throw new AppError("Invalid requestor data in scope", 500);
     }
-    const requestor = siteVisit.addedBy;
-
-    const projectTitle =
-      (siteVisit.projectId as any)?.name || "Unnamed Project";
+    const requestor = siteVisit.clientRepresentative;
 
     if (requestor.email) {
       await sendSiteVisitAcceptedEmail({
         requestorEmail: requestor.email,
         requestorName: requestor.fullName,
-        projectTitle,
-        siteVisitDate,
-        siteVisitTime,
+        projectTitle: project.scope.scopeTitle,
+        siteVisitDate: siteVisit.siteVisitDate,
+        siteVisitTime: siteVisit.siteVisitTime,
         adminName,
         year: new Date().getFullYear(),
       } as SiteVisitAcceptedEmailOptions);

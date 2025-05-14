@@ -59,7 +59,7 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
   );
   const populatedScope = await scope.populate(
     "client addedBy",
-    "clientName clientBusinessName clientLogo fullName email"
+    "clientName clientLogo clientPhone clientEmail clientNatureOfBusiness fullName email"
   );
 
   await ScopeService.notifyAdminOnScopeCreation(populatedScope);
@@ -94,7 +94,7 @@ export const resendScopeApproval = catchAsync(
 
     await resendScopeApprovalRequestEmail({
       admin: { fullName, email },
-      projectTitle: scope.projectTitle,
+      projectTitle: scope.scopeTitle,
       scopeTitle: scope.natureOfWork,
       acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
     });
@@ -243,10 +243,15 @@ export const getScope = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("Scope not found", 404);
   }
 
+  const populatedScope = await scope.populate(
+    "client addedBy",
+    "clientName clientLogo fullName email"
+  );
+
   return sendSuccess({
     res,
     message: "Scope fetched successfully",
-    data: { scope },
+    data: { scope: populatedScope },
   });
 });
 
@@ -255,7 +260,7 @@ export const listScopes = catchAsync(async (req: Request, res: Response) => {
   const features = new APIFeatures(
     Scope.find({ deletedAt: null }).populate(
       "client addedBy",
-      "clientBusinessName clientName clientLogo fullName email "
+      "clientName clientLogo clientPhone clientEmail clientNatureOfBusiness fullName email"
     ),
     req.query
   );
@@ -277,15 +282,10 @@ export const searchScopes = catchAsync(async (req: Request, res: Response) => {
   const scopes = await search({
     model: Scope,
     keyword,
-    searchFields: [
-      "projectTitle",
-      "scopeId",
-      "client.clientName",
-      "client.clientBusinessName",
-    ],
+    searchFields: ["scopeTitle", "scopeId", "client.clientName"],
     populateFields: ["client"],
     selectFields:
-      "projectTitle scopeId status createdAt client.clientName client.clientBusinessName",
+      "scopeTitle scopeId status createdAt client.clientName client.clientName client.clientLogo client.clientPhone client.clientEmail",
   });
 
   return sendSuccess({

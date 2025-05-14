@@ -21,7 +21,7 @@ const fileFilter = (
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  const imageFieldNames = ["clientLogo", "userProfilePicture"];
+  const imageFieldNames = ["clientLogo", "avatar"];
   const documentFieldNames = ["uploadedScopes"];
 
   if (imageFieldNames.includes(file.fieldname)) {

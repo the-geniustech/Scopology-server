@@ -1,19 +1,13 @@
 import SiteVisit from "@models/SiteVisit.model";
-import { ISiteVisit } from "@interfaces/siteVisit.interface";
 import AppError from "@utils/appError";
-import { ObjectId } from "mongoose";
-interface CreateSiteVisitInput {
-  projectId: string;
-  clientRepresentative: string;
-  contactMethod: ISiteVisit["contactMethod"];
-  siteVisitAt: Date;
-  commuteTimeMinutes: number;
-  notes?: string;
-  addedBy: string;
-}
+import { CreateSiteVisitInput } from "./siteVisit.validator";
 
 export const createSiteVisit = async (input: CreateSiteVisitInput) => {
   const siteVisit = await SiteVisit.create(input);
+
+  if (!siteVisit) {
+    throw new AppError("siteVisit creation failed, please again later!", 400);
+  }
   return siteVisit;
 };
 

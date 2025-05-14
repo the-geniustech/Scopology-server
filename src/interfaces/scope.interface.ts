@@ -4,14 +4,17 @@ export type ScopeStatus = "pending" | "approved" | "rejected";
 export type ScopeSource = "manual" | "client_upload" | "AI";
 
 export interface IScope {
-  scopeId: string;
   client?: ObjectId;
+  scopeId: string;
+  scopeOverview: string;
   entryRequirements: string[];
   natureOfWork: string;
   isUploadedScopes?: boolean;
   uploadedScopes: Object[];
-  projectTitle: string;
+  scopeTitle: string;
+  projectTitle?: string;
   projectDescription: string;
+  progress: number;
   status: ScopeStatus;
   source: ScopeSource;
   addedBy: ObjectId;
@@ -27,7 +30,7 @@ export interface ResendScopeApprovalOptions {
     fullName: string;
     email: string;
   };
-  projectTitle: string;
+  projectTitle?: string;
   scopeTitle: string;
   acceptLink: string;
 }
@@ -37,7 +40,7 @@ export interface ScopeApprovalOptions {
     fullName: string;
     email: string;
   };
-  projectTitle: string;
+  projectTitle?: string;
   scopeTitle: string;
   acceptLink: string;
 }
@@ -49,7 +52,7 @@ interface SiteVisitRequestEmailOptions {
   contactMethod: string;
   siteVisitDate: string;
   siteVisitTime: string;
-  projectTitle: string;
+  projectTitle?: string;
   adminEmail: string;
   dashboardUrl: string;
   year: number;

@@ -8,13 +8,14 @@ const clientTypeEnum = z.enum(
 );
 
 export const createClientSchema = z.object({
-  clientBusinessName: z
-    .string()
-    .min(2, { message: "Client BusinessName name is required" }),
-  clientName: z.string().min(2, { message: "Client name is required" }),
-
+  clientName: z.string().min(1, { message: "Client name is required" }),
   clientAddress: z.string().min(5, { message: "Client Address is required" }),
-  clientPhone: z.string().min(5, { message: "Client Contact is required" }),
+  clientPhone: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+    message: "Please provide a valid phone number",
+  }),
+  clientPurchaseNumber: z
+    .string()
+    .min(1, { message: "Client Purchase Number is required" }),
   clientEmail: z
     .string()
     .email({ message: "Please provide a valid email address" }),

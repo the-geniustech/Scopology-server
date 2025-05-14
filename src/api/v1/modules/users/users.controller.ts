@@ -18,7 +18,7 @@ export const previewNextUserId = catchAsync(
     return sendSuccess({
       res,
       message: "Next available userId (preview)",
-      data: { nextUserId: nextId },
+      data: { user: { nextId } },
     });
   }
 );
@@ -45,7 +45,7 @@ export const getUserStatsController = catchAsync(
     sendSuccess({
       res,
       message: "User stats retrieved successfully",
-      data: stats,
+      data: { users: { stats } },
     });
   }
 );
@@ -93,7 +93,30 @@ export const getUserByEmail = catchAsync(
 
     return sendSuccess({
       res,
-      data: user,
+      data: { user },
+    });
+  }
+);
+
+export const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req.user as any).id;
+  const updatedUser = await UserService.updateUserProfile(userId, req.body);
+
+  return sendSuccess({
+    res,
+    message: "Profile updated successfully",
+    data: { user: updatedUser },
+  });
+});
+
+export const updatePassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = (req.user as any).id;
+    await UserService.updateUserPassword(userId, req.body);
+
+    return sendSuccess({
+      res,
+      message: "Password updated successfully",
     });
   }
 );

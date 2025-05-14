@@ -13,11 +13,20 @@ export const createScopeSchema = z.object({
       })
     )
     .optional(),
-  projectTitle: z.string(),
+  scopeOverview: z
+    .string()
+    .min(50, {
+      message: "Scope Overview should not be less that 100 characters",
+    })
+    .optional(),
+  projectTitle: z.string().optional(),
+  scopeTitle: z.string(),
   projectDescription: z.string(),
   scopeId: z.string(),
   addedBy: z.string(),
-  client: z.string(),
+  client: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Please provide a valid client Id",
+  }),
 });
 
 const updateScopeSchema = z.object({

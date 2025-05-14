@@ -7,19 +7,18 @@ const router = express.Router();
 
 router.use(protect);
 
-// Standard CRUD
 router
   .route("/")
   .post(projectControllers.createProject)
   .get(projectControllers.getAllProjects);
-router
-  .route("/:id")
-  .get(projectControllers.getProject)
-  .patch(projectControllers.updateProject)
-  .delete(projectControllers.deleteProject);
 
-// Soft delete (archive) and undo (restore)
+router.get("/search", projectControllers.searchProjects);
+
+router.route("/:id").get(projectControllers.getProject);
+// .patch(projectControllers.updateProject)
+// .delete(projectControllers.deleteProject);
+
 router.patch("/:id/archive", projectControllers.archiveProject);
-router.patch("/:id/restore", projectControllers.restoreProject);
+router.patch("/:id/restore", projectControllers.unarchiveProject);
 
 export default router;

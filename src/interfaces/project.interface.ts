@@ -5,13 +5,17 @@ export interface IProject {
   title: string;
   description: string;
   client: Types.ObjectId;
+  scope: Types.ObjectId;
+  quotation: Types.ObjectId;
   createdBy: Types.ObjectId;
+  progress: number;
   status?: "active" | "completed" | "paused" | "cancelled";
   startDate: Date;
-  endDate?: Date;
-  scopes?: Types.ObjectId[];
+  expectedCompletionDate?: Date;
+  siteVisits?: Types.ObjectId[];
   deletedBy: Types.ObjectId | string | null;
   deletedAt?: Date | null;
+  isArchived?: boolean;
 }
 
 export interface IProjectDocument extends IProject, Document {}

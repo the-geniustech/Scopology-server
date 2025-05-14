@@ -1,16 +1,14 @@
 import { generateICS } from "@utils/generateICS";
-import { EmailPayload } from "@interfaces/mail.interface";
 import { renderTemplate } from "../renderTemplate";
 import { sendEmail } from "..";
 
 export interface SiteVisitAcceptedEmailOptions {
   requestorEmail: string;
   requestorName: string;
-  projectTitle: string;
-  siteVisitDate: string;
+  projectTitle?: string;
+  siteVisitDate: Date;
   siteVisitTime: string;
   adminName: string;
-  siteVisitAt: Date;
   year: number;
 }
 
@@ -21,24 +19,29 @@ export const sendSiteVisitAcceptedEmail = async ({
   siteVisitDate,
   siteVisitTime,
   adminName,
-  siteVisitAt,
   year,
 }: SiteVisitAcceptedEmailOptions): Promise<void> => {
+  const visitDateObj = new Date(siteVisitDate);
+
   const html = await renderTemplate("siteVisitAccepted", {
     requestorName,
     projectTitle,
-    siteVisitDate,
+    siteVisitDate: visitDateObj.toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
     siteVisitTime,
     adminName,
     year,
   });
 
-  // 🧠 Generate ICS string
   const icsContent = await generateICS({
     title: `Site Visit: ${projectTitle}`,
     description: `Scheduled site visit for ${projectTitle} with Scopology.`,
     location: "Client Site (see project details)",
-    start: siteVisitAt,
+    start: siteVisitDate,
     durationMinutes: 60,
     organizer: {
       name: "Scopology Admin",
@@ -58,7 +61,7 @@ export const sendSiteVisitAcceptedEmail = async ({
         contentType: "text/calendar",
       },
     ],
-  } as EmailPayload;
+  };
 
   await sendEmail(payload);
 };

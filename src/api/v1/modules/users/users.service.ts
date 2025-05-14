@@ -2,6 +2,12 @@ import User from "@models/User.model";
 import { IUserDocument } from "@interfaces/user.interface";
 import { FilterQuery, UpdateQuery } from "mongoose";
 
+import AppError from "@utils/appError";
+import {
+  UpdateUserProfileInput,
+  UpdateUserPasswordInput,
+} from "./users.validator";
+
 import { Counter } from "@models/Counter.model";
 
 export const getNextUserIdPreview = async (): Promise<number> => {
@@ -60,15 +66,46 @@ export const getUserByEmail = async (
 export const getUserByUserId = async (
   userId: number
 ): Promise<IUserDocument | null> => {
-  return await User.findOne({ userId, deletedAt: null }).select("-password");
+  return await User.findOne({ userId, deletedAt: null });
 };
 
 export const getUserByObjectId = async (
   _id: string
 ): Promise<IUserDocument | null> => {
-  return await User.findById(_id)
-    .where({ deletedAt: null })
-    .select("-password");
+  return await User.findById(_id).where({ deletedAt: null });
+};
+
+export const updateUserProfile = async (
+  userId: string,
+  data: UpdateUserProfileInput
+) => {
+  const user = await User.findByIdAndUpdate(userId, data, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  return user;
+};
+
+export const updateUserPassword = async (
+  userId: string,
+  data: UpdateUserPasswordInput
+) => {
+  const user = await User.findById(userId).select("+password");
+
+  if (!user) throw new AppError("User not found", 404);
+
+  const isMatch = await user.comparePassword(data.currentPassword);
+  if (!isMatch) throw new AppError("Current password is incorrect", 401);
+
+  user.password = data.newPassword;
+  await user.save({ validateModifiedOnly: true });
+
+  return user;
 };
 
 export const updateUserById = async (
@@ -78,7 +115,7 @@ export const updateUserById = async (
   return await User.findByIdAndUpdate(_id, updates, {
     new: true,
     runValidators: true,
-  }).select("-password");
+  });
 };
 
 export const softDeleteUser = async (

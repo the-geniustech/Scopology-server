@@ -3,17 +3,17 @@ import mongoose, { Schema } from "mongoose";
 
 const clientSchema = new Schema<IClient>(
   {
-    clientBusinessName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     clientName: {
       type: String,
       required: true,
       trim: true,
     },
     clientAddress: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    clientPurchaseNumber: {
       type: String,
       required: true,
       trim: true,

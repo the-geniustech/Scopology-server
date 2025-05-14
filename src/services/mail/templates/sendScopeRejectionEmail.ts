@@ -1,11 +1,10 @@
 import { sendEmail } from "../index";
 import { renderTemplate } from "../renderTemplate";
-import { EmailPayload } from "@interfaces/mail.interface";
 
 interface ScopeRejectionEmailOptions {
   clientEmail: string;
   clientName: string;
-  projectTitle: string;
+  projectTitle?: string;
   scopeTitle: string;
   rejectionReason: string;
   rejectionMessage?: string;
@@ -37,5 +36,5 @@ export const sendScopeRejectionEmail = async ({
     html,
   };
 
-  await sendEmail(payload as EmailPayload);
+  await sendEmail(payload);
 };

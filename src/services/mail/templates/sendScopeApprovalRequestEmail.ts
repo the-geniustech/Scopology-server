@@ -1,6 +1,5 @@
 import { renderTemplate } from "../renderTemplate";
 import { sendEmail } from "../index";
-import { EmailPayload } from "@interfaces/mail.interface";
 import {
   ResendScopeApprovalOptions,
   ScopeApprovalOptions,
@@ -22,11 +21,7 @@ export const sendScopeApprovalRequestEmail = async ({
     year: new Date().getFullYear(),
   });
 
-  await sendEmail({
-    to: admin.email,
-    subject,
-    html,
-  } as EmailPayload);
+  await sendEmail({ to: admin.email, subject, html });
 };
 
 export const resendScopeApprovalRequestEmail = async ({
@@ -45,9 +40,5 @@ export const resendScopeApprovalRequestEmail = async ({
     year: new Date().getFullYear(),
   });
 
-  await sendEmail({
-    to: admin.email,
-    subject,
-    html,
-  } as EmailPayload);
+  await sendEmail({ to: admin.email, subject, html });
 };

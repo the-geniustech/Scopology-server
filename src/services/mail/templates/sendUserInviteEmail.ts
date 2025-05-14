@@ -1,6 +1,5 @@
 import { renderTemplate } from "../renderTemplate";
 import { sendEmail } from "../index";
-import { EmailPayload } from "@interfaces/mail.interface";
 
 interface InviteEmailOptions {
   user: {
@@ -31,9 +30,5 @@ export const sendUserInviteEmail = async ({
     year: new Date().getFullYear(),
   });
 
-  await sendEmail({
-    to: user.email,
-    subject,
-    html,
-  } as EmailPayload);
+  await sendEmail({ to: user.email, subject, html });
 };

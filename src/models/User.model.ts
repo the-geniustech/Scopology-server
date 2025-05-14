@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Query, Schema, model } from "mongoose";
 import { IUserDocument } from "@interfaces/user.interface";
 import bcrypt from "bcrypt";
 
@@ -20,6 +20,17 @@ const userSchema = new Schema<IUserDocument>(
       unique: true,
       lowercase: true,
       trim: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    avatar: {
+      type: {
+        url: String,
+        publicId: String,
+      },
     },
     password: {
       type: String,
@@ -56,6 +67,15 @@ const userSchema = new Schema<IUserDocument>(
   {
     timestamps: true,
     versionKey: false,
+  }
+);
+
+userSchema.pre(
+  /^find/,
+  function (this: Query<IUserDocument, IUserDocument>, next: Function) {
+    // `this` refers to the current query
+    this.find({ isActive: { $ne: false } });
+    next();
   }
 );
 
