@@ -1,37 +1,14 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Scope Rejected</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        color: #333;
-      }
-      .container {
-        max-width: 600px;
-        margin: auto;
-        padding: 24px;
-        border: 1px solid #eee;
-        border-radius: 8px;
-      }
-      .logo {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .logo img {
-        width: 120px;
-      }
-      .highlight {
-        color: {{primaryColor}};
-        font-weight: bold;
-      }
-      .footer {
-        font-size: 12px;
-        color: #888;
-        margin-top: 30px;
-        text-align: center;
-      }
+      body { font-family: Arial, sans-serif; color: #333; } .container {
+      max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee;
+      border-radius: 8px; } .logo { text-align: center; margin-bottom: 20px; }
+      .logo img { width: 120px; } .highlight { color:
+      {{primaryColor}}; font-weight: bold; } .footer { font-size: 12px; color:
+      #888; margin-top: 30px; text-align: center; }
     </style>
   </head>
 
@@ -45,12 +22,14 @@
 
       <p>
         We appreciate your effort in submitting a scope titled
-        <strong>"{{scopeTitle}}"</strong> under the project
-        <strong>"{{projectTitle}}"</strong>.
+        <strong>"{{scopeTitle}}"</strong>
+        with the nature of work
+        <strong>"{{natureOfWork}}"</strong>.
       </p>
 
       <p>
-        However, after reviewing the submission, it has been <span class="highlight">rejected</span>.
+        However, after reviewing the submission, it has been
+        <span class="highlight">rejected</span>.
       </p>
 
       <p>
@@ -66,13 +45,16 @@
       {{/if}}
 
       <p>
-        Please review and revise accordingly if you plan to resubmit. You can reach out to us if you need more clarification.
+        Please review and revise accordingly if you plan to resubmit. You can
+        reach out to us if you need more clarification.
       </p>
 
       <p>Best regards,<br />The Scopology Team</p>
 
       <div class="footer">
-        &copy; {{year}} Scopology. All rights reserved.
+        &copy;
+        {{year}}
+        Scopology. All rights reserved.
       </div>
     </div>
   </body>

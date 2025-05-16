@@ -7,6 +7,7 @@ const router = Router();
 router.use(protect);
 
 router.route("/").post(siteVisitController.createSiteVisitController);
+router.get("/stats", siteVisitController.getSiteVisitStats);
 router
   .route("/:siteVisitId/accept")
   .patch(siteVisitController.acceptSiteVisitController);

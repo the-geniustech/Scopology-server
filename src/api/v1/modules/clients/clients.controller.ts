@@ -52,7 +52,7 @@ export const searchUsers = catchAsync(async (req: Request, res: Response) => {
     keyword,
     searchFields: ["clientName", "clientPhone", "clientEmail"],
     selectFields:
-      "clientName clientPhone clientEmail createdAt clientLogo clientType",
+      "clientName clientPhone clientEmail createdAt clientLogo clientNature",
   });
 
   return sendSuccess({

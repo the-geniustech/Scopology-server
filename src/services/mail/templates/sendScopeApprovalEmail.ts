@@ -6,20 +6,20 @@ export interface ScopeApprovalEmailOptions {
   clientName: string;
   clientEmail: string;
   scopeTitle: string;
-  projectTitle?: string;
+  natureOfWork?: string;
   acceptLink: string;
 }
 
 export const sendScopeApprovalEmail = async ({
   clientName,
   clientEmail,
-  projectTitle,
+  natureOfWork,
   scopeTitle,
 }: ScopeApprovalEmailOptions): Promise<void> => {
   const html = await renderTemplate("scopeApproval", {
     clientName,
     scopeTitle,
-    projectTitle,
+    natureOfWork,
     logoUrl:
       "https://res.cloudinary.com/dhngpbp2y/image/upload/v1745418384/Scopology_tpzklz.png",
     year: new Date().getFullYear(),

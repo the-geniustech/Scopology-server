@@ -4,8 +4,8 @@ import { renderTemplate } from "../renderTemplate";
 interface ScopeRejectionEmailOptions {
   clientEmail: string;
   clientName: string;
-  projectTitle?: string;
   scopeTitle: string;
+  natureOfWork?: string;
   rejectionReason: string;
   rejectionMessage?: string;
 }
@@ -13,15 +13,15 @@ interface ScopeRejectionEmailOptions {
 export const sendScopeRejectionEmail = async ({
   clientEmail,
   clientName,
-  projectTitle,
   scopeTitle,
+  natureOfWork,
   rejectionReason,
   rejectionMessage,
 }: ScopeRejectionEmailOptions): Promise<void> => {
   const html = await renderTemplate("scopeRejection", {
     clientName,
-    projectTitle,
     scopeTitle,
+    natureOfWork,
     rejectionReason,
     rejectionMessage,
     logoUrl:

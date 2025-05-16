@@ -11,7 +11,7 @@ export const populateProject = async (id: string) => {
   const project = await Project.findOne({ _id: id, deletedAt: null })
     .populate(
       "client",
-      "clientName clientLogo clientPhone clientEmail clientType"
+      "clientName clientLogo clientPhone clientEmail clientNature"
     )
     .populate("scope", "-client");
   // .populate("createdBy", "fullName email phoneNumber");

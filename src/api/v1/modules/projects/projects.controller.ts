@@ -23,6 +23,22 @@ export const createProject = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("Scope or Client could not be found", 404);
   }
 
+  if (
+    !scope.client ||
+    typeof scope.client !== "object" ||
+    !("clientNature" in scope.client) ||
+    !("clientName" in scope.client) ||
+    !("_id" in scope.client)
+  ) {
+    throw new AppError("Invalid client data in scope", 500);
+  }
+
+  const client = scope.client as {
+    _id: string;
+    clientName: string;
+    clientNature: string;
+  };
+
   const projectId = await projectService.generateNextProjectId(
     getInitials(scope.scopeTitle)
   );
@@ -30,7 +46,11 @@ export const createProject = catchAsync(async (req: Request, res: Response) => {
   const payload = validateData(createProjectSchema, {
     ...req.body,
     projectId,
-    client: scope.client.toString(),
+    title: scope.scopeTitle,
+    type: client.clientNature,
+    category: scope.natureOfWork,
+    client: client._id.toString(),
+    clientName: client.clientName,
     scope: scope.id,
     createdBy: user.id,
   });
@@ -50,7 +70,9 @@ export const createProject = catchAsync(async (req: Request, res: Response) => {
 
 export const getProject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const project = await projectService.getProjectById(id);
+  const project = await Project.findById(id).populate(
+    "client scope siteVisits"
+  );
 
   if (!project || project.deletedAt) {
     throw new AppError("Project not found", 404);
@@ -74,44 +96,24 @@ export const getProjectStats = catchAsync(
   }
 );
 
-// export const getAllProjects = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const baseUrl = `${req.baseUrl}${req.path}`;
-//     const features = new APIFeatures(
-//       Project.find({ isArchived: false, deletedAt: null })
-//         .populate({
-//           path: "client",
-//           select:
-//             "clientName clientPhone clientEmail clientLogo clientType",
-//         })
-//         .populate({
-//           path: "scope",
-//           select: "-client",
-//         })
-//         .populate({
-//           path: "siteVisits",
-//           select: "-projectId",
-//         }),
-//       req.query
-//     );
-//     const { data: projects, pagination } =
-//       await features.applyAllFiltersWithPaginationMeta(baseUrl);
-
-//     return res.status(200).json({
-//       status: "success",
-//       message: "List of projects",
-//       pagination,
-//       results: projects.length,
-//       data: { projects },
-//     });
-//   }
-// );
 export const getAllProjects = catchAsync(
   async (req: Request, res: Response) => {
     const baseUrl = `${req.baseUrl}${req.path}`;
-    const query = Project.find({ deletedAt: null });
-    const features = new AdvancedAPIFeatures(Project, query, req.query);
+    const query = Project.find({ deletedAt: null })
+      .populate({
+        path: "client",
+        select: "clientName clientPhone clientEmail clientLogo clientNature",
+      })
+      .populate({
+        path: "scope",
+        select: "-client",
+      })
+      .populate({
+        path: "siteVisits",
+        select: "-projectId",
+      });
 
+    const features = new AdvancedAPIFeatures(Project, query, req.query);
     const { data: projects, pagination } = await features.applyAll(baseUrl);
 
     return res.status(200).json({
@@ -129,10 +131,16 @@ export const searchProjects = catchAsync(
     const projects = await search({
       model: Project,
       keyword,
-      searchFields: ["scope.scopeTitle", "projectId", "client.clientName"],
+      searchFields: [
+        "scope.scopeTitle",
+        "projectId",
+        "type",
+        "title",
+        "client.clientName",
+      ],
       populateFields: ["client", "scope"],
       selectFields:
-        "-scope.client projectId status createdAt client.clientName client.clientPhone client.clientEmail client.clientLogo client.clientType",
+        "projectId status title type createdAt client.clientName client.clientPhone client.clientEmail client.clientLogo client.clientNature scope.scopeTitle scope.natureOfWork",
     });
 
     return sendSuccess({

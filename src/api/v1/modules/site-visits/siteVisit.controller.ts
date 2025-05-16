@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import dayjs from "dayjs";
 import { catchAsync } from "@utils/catchAsync";
 import { sendSuccess } from "@utils/responseHandler";
 import * as siteVisitServices from "./siteVisit.service";
@@ -171,3 +172,110 @@ export const acceptSiteVisitController = catchAsync(
     });
   }
 );
+
+export const getSiteVisitStats = catchAsync(
+  async (req: Request, res: Response) => {
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
+    const endOfToday = new Date();
+    endOfToday.setUTCHours(23, 59, 59, 999);
+
+    const yesterdayStart = dayjs().subtract(1, "day").startOf("day").toDate();
+    const yesterdayEnd = dayjs().subtract(1, "day").endOf("day").toDate();
+
+    console.log("startOfToday", startOfToday);
+    console.log("endOfToday", endOfToday);
+    console.log("yesterdayStart", yesterdayStart);
+    console.log("yesterdayEnd", yesterdayEnd);
+
+    const [
+      todayVisits,
+      pendingTotal,
+      doneTotal,
+      total,
+      yesterdayVisits,
+      pendingYesterday,
+      doneYesterday,
+    ] = await Promise.all([
+      SiteVisit.countDocuments({
+        siteVisitDate: { $gte: startOfToday, $lte: endOfToday },
+        deletedAt: null,
+      }),
+      SiteVisit.countDocuments({ status: "pending", deletedAt: null }),
+      SiteVisit.countDocuments({ status: "done", deletedAt: null }),
+      SiteVisit.countDocuments({ deletedAt: null }),
+
+      SiteVisit.countDocuments({
+        siteVisitDate: { $gte: yesterdayStart, $lte: yesterdayEnd },
+        deletedAt: null,
+      }),
+      SiteVisit.countDocuments({
+        status: "pending",
+        createdAt: { $lte: startOfToday },
+        deletedAt: null,
+      }),
+      SiteVisit.countDocuments({
+        status: "done",
+        createdAt: { $lte: yesterdayEnd },
+        deletedAt: null,
+      }),
+    ]);
+
+    console.log("todayVisits: ", todayVisits);
+    console.log("yesterdayVisits: ", yesterdayVisits);
+    console.log("pendingYesterday: ", pendingYesterday);
+    console.log("pendingYesterday: ", pendingYesterday);
+    console.log("doneTotal: ", doneTotal);
+    console.log("doneYesterday: ", doneYesterday);
+
+    const calcChange = (current: number, previous: number): number => {
+      console.log("current: ", current);
+      console.log("previous: ", previous);
+
+      return previous === 0
+        ? 100
+        : Math.round((Math.abs(current - previous) / previous) * 100);
+    };
+
+    return sendSuccess({
+      res,
+      message: "Site Visit Stats retrieved successfully",
+      data: {
+        siteVisits: {
+          stats: {
+            todaysVisits: {
+              count: todayVisits,
+              // change: calcChange(todayVisits, yesterdayVisits),
+              change:
+                Math.round((todayVisits / total) * 100) -
+                Math.round((yesterdayVisits / total) * 100),
+              overalPercentage: Math.round((todayVisits / total) * 100),
+            },
+            pendingApprovals: {
+              count: pendingTotal,
+              change:
+                Math.round((pendingTotal / total) * 100) -
+                Math.round((pendingYesterday / total) * 100),
+              overalPercentage: Math.round((pendingTotal / total) * 100),
+            },
+            completedVisits: {
+              count: doneTotal,
+              change:
+                Math.round((doneTotal / total) * 100) -
+                Math.round((doneYesterday / total) * 100),
+              overalPercentage: Math.round((doneTotal / total) * 100),
+            },
+          },
+        },
+      },
+    });
+  }
+);
+
+// function ISODate(dateString: string): Date {
+//   const date = new Date(dateString);
+//   if (isNaN(date.getTime())) {
+//     throw new Error(`Invalid date string: ${dateString}`);
+//   }
+//   return date;
+// }

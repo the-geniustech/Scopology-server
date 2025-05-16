@@ -12,8 +12,6 @@ export interface IScope {
   isUploadedScopes?: boolean;
   uploadedScopes: Object[];
   scopeTitle: string;
-  projectTitle?: string;
-  projectDescription: string;
   progress: number;
   status: ScopeStatus;
   source: ScopeSource;
@@ -30,8 +28,8 @@ export interface ResendScopeApprovalOptions {
     fullName: string;
     email: string;
   };
-  projectTitle?: string;
   scopeTitle: string;
+  natureOfWork: string;
   acceptLink: string;
 }
 
@@ -40,7 +38,7 @@ export interface ScopeApprovalOptions {
     fullName: string;
     email: string;
   };
-  projectTitle?: string;
+  natureOfWork: string;
   scopeTitle: string;
   acceptLink: string;
 }
@@ -52,7 +50,7 @@ interface SiteVisitRequestEmailOptions {
   contactMethod: string;
   siteVisitDate: string;
   siteVisitTime: string;
-  projectTitle?: string;
+  scopeTitle: string;
   adminEmail: string;
   dashboardUrl: string;
   year: number;

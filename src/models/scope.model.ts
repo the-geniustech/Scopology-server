@@ -42,14 +42,6 @@ const scopeSchema = new Schema<IScopeDocument>(
         message: (props: any) => `${props.path} must have at least one item.`,
       },
     },
-    projectTitle: {
-      type: String,
-      required: true,
-    },
-    projectDescription: {
-      type: String,
-      required: true,
-    },
     progress: {
       type: Number,
       required: true,

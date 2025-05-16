@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env NODE_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "nodemon -r tsconfig-paths/register src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "fs-extra": "^11.3.0",

@@ -19,9 +19,7 @@ export const createScopeSchema = z.object({
       message: "Scope Overview should not be less that 100 characters",
     })
     .optional(),
-  projectTitle: z.string().optional(),
   scopeTitle: z.string(),
-  projectDescription: z.string(),
   scopeId: z.string(),
   addedBy: z.string(),
   client: z.string().regex(/^[0-9a-fA-F]{24}$/, {
@@ -34,8 +32,6 @@ const updateScopeSchema = z.object({
   natureOfWork: z.string().optional(),
   isUploadedScopes: z.boolean().optional(),
   uploadedScopes: z.array(z.any()).optional(),
-  projectTitle: z.string().optional(),
-  projectDescription: z.string().optional(),
   status: z.enum(["pending", "approved", "rejected"]).optional(),
 });
 

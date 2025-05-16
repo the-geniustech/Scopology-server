@@ -7,7 +7,7 @@ import {
 
 export const sendScopeApprovalRequestEmail = async ({
   admin,
-  projectTitle,
+  natureOfWork,
   scopeTitle,
   acceptLink,
 }: ScopeApprovalOptions): Promise<void> => {
@@ -15,7 +15,7 @@ export const sendScopeApprovalRequestEmail = async ({
 
   const html = await renderTemplate("ScopeApproval", {
     fullName: admin.fullName,
-    projectTitle,
+    natureOfWork,
     scopeTitle,
     acceptLink,
     year: new Date().getFullYear(),
@@ -26,7 +26,7 @@ export const sendScopeApprovalRequestEmail = async ({
 
 export const resendScopeApprovalRequestEmail = async ({
   admin,
-  projectTitle,
+  natureOfWork,
   scopeTitle,
   acceptLink,
 }: ResendScopeApprovalOptions): Promise<void> => {
@@ -34,7 +34,7 @@ export const resendScopeApprovalRequestEmail = async ({
 
   const html = await renderTemplate("ScopeApproval", {
     fullName: admin.fullName,
-    projectTitle,
+    natureOfWork,
     scopeTitle,
     acceptLink,
     year: new Date().getFullYear(),

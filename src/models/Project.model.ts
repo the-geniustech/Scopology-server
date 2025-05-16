@@ -8,9 +8,9 @@ const projectSchema = new Schema<IProjectDocument>(
       required: true,
       unique: true,
     },
+    title: { type: String, required: true },
     type: { type: String, required: true },
     category: { type: String, required: true },
-    title: { type: String, required: true },
     clientName: { type: String, required: true },
     client: {
       type: Schema.Types.ObjectId,

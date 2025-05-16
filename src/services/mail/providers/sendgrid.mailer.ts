@@ -12,7 +12,7 @@ export class SendGridMailer implements EmailProvider {
       from: process.env.MAIL_FROM_ADDRESS!,
       subject: payload.subject,
       html: payload.html,
-      text: payload.text,
+      text: payload.text ?? "",
     });
   }
 }

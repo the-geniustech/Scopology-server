@@ -59,7 +59,7 @@ export const createScope = catchAsync(async (req: Request, res: Response) => {
   );
   const populatedScope = await scope.populate(
     "client addedBy",
-    "clientName clientLogo clientPhone clientEmail clientType fullName email"
+    "clientName clientLogo clientPhone clientEmail clientNature fullName email"
   );
 
   await ScopeService.notifyAdminOnScopeCreation(populatedScope);
@@ -94,8 +94,8 @@ export const resendScopeApproval = catchAsync(
 
     await resendScopeApprovalRequestEmail({
       admin: { fullName, email },
-      projectTitle: scope.scopeTitle,
-      scopeTitle: scope.natureOfWork,
+      scopeTitle: scope.scopeTitle,
+      natureOfWork: scope.natureOfWork,
       acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
     });
 
@@ -105,8 +105,8 @@ export const resendScopeApproval = catchAsync(
       data: {
         scope: {
           scopeId: scope._id,
-          projectTitle: scope.projectTitle,
-          scopeTitle: scope.natureOfWork,
+          scopeTitle: scope.scopeTitle,
+          natureOfWork: scope.natureOfWork,
         },
       },
     });
@@ -153,8 +153,8 @@ export const approveScope = catchAsync(async (req: Request, res: Response) => {
   await sendScopeApprovalEmail({
     clientName,
     clientEmail,
-    projectTitle: scope.projectTitle,
-    scopeTitle: scope.natureOfWork,
+    scopeTitle: scope.scopeTitle,
+    natureOfWork: scope.natureOfWork,
   } as ScopeApprovalEmailOptions);
 
   return sendSuccess({
@@ -164,7 +164,7 @@ export const approveScope = catchAsync(async (req: Request, res: Response) => {
       scope: {
         scopeId: scope._id,
         status: scope.status,
-        projectTitle: scope.projectTitle,
+        scopeTitle: scope.scopeTitle,
         natureOfWork: scope.natureOfWork,
         clientName,
       },
@@ -210,8 +210,8 @@ export const rejectScope = catchAsync(async (req: Request, res: Response) => {
   await sendScopeRejectionEmail({
     clientEmail,
     clientName,
-    projectTitle: scope.projectTitle,
-    scopeTitle: scope.natureOfWork,
+    scopeTitle: scope.scopeTitle,
+    natureOfWork: scope.natureOfWork,
     rejectionReason: scope.rejectionReason!,
     rejectionMessage: scope.rejectionMessage,
   });
@@ -260,7 +260,7 @@ export const listScopes = catchAsync(async (req: Request, res: Response) => {
   const features = new APIFeatures(
     Scope.find({ deletedAt: null }).populate(
       "client addedBy",
-      "clientName clientLogo clientPhone clientEmail clientType fullName email"
+      "clientName clientLogo clientPhone clientEmail clientNature fullName email"
     ),
     req.query
   );
