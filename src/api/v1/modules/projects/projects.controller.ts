@@ -12,9 +12,10 @@ import { AdvancedAPIFeatures, APIFeatures } from "@utils/apiFeatures.util";
 import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
-import ProjectCopy from "@models/Scope.model";
+// import ProjectCopy from "@models/Scope.model";
+import Scope from "@models/Scopes.model";
 
-console.log("Scope model is working!", ProjectCopy);
+console.log("Scope model is working!", Scope);
 
 // export const createProject = catchAsync(async (req: Request, res: Response) => {
 //   const user = req.user;
