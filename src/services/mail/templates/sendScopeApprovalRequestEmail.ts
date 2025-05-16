@@ -13,7 +13,7 @@ export const sendScopeApprovalRequestEmail = async ({
 }: ScopeApprovalOptions): Promise<void> => {
   const subject = `Action Required: Accept Project Scope Invitation`;
 
-  const html = await renderTemplate("ScopeApproval", {
+  const html = await renderTemplate("scopeApproval", {
     fullName: admin.fullName,
     natureOfWork,
     scopeTitle,
@@ -32,7 +32,7 @@ export const resendScopeApprovalRequestEmail = async ({
 }: ResendScopeApprovalOptions): Promise<void> => {
   const subject = `Reminder: Accept Your Project Scope Invitation`;
 
-  const html = await renderTemplate("ScopeApproval", {
+  const html = await renderTemplate("scopeApproval", {
     fullName: admin.fullName,
     natureOfWork,
     scopeTitle,
