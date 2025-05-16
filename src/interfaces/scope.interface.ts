@@ -3,7 +3,7 @@ import { ObjectId, Document } from "mongoose";
 export type ScopeStatus = "pending" | "approved" | "rejected";
 export type ScopeSource = "manual" | "client_upload" | "AI";
 
-export interface IScope {
+export interface IScope extends Document {
   scopeId: string;
   client: ObjectId;
   scopeTitle: string;
@@ -21,7 +21,7 @@ export interface IScope {
   deletedAt?: Date | null;
 }
 
-export interface IScopeDocument extends IScope, Document {}
+export interface IScopeDocument extends IScope {}
 
 /* export interface IScope {
   client?: ObjectId;
