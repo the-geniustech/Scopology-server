@@ -13,6 +13,8 @@ import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
 
+console.log("Scope model is working!", Scope);
+
 export const createProject = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   if (!user) {
