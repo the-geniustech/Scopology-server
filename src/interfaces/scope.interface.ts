@@ -42,16 +42,3 @@ export interface ScopeApprovalOptions {
   scopeTitle: string;
   acceptLink: string;
 }
-
-interface SiteVisitRequestEmailOptions {
-  fullName: string;
-  clientName: string;
-  clientRepresentative: string;
-  contactMethod: string;
-  siteVisitDate: string;
-  siteVisitTime: string;
-  scopeTitle: string;
-  adminEmail: string;
-  dashboardUrl: string;
-  year: number;
-}

@@ -8,7 +8,7 @@ import { sendSuccess } from "@utils/responseHandler";
 import { IProject } from "@interfaces/project.interface";
 import { search } from "@utils/search.util";
 import { AdvancedAPIFeatures, APIFeatures } from "@utils/apiFeatures.util";
-import Scope from "@models/Scope.model";
+import Scope from "../../../../models/Scope.model";
 import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
