@@ -1,4 +1,4 @@
-/* import Scope from "@models/Scope.model";
+//  import Scope from "@models/Scope.model";
 import { IScope, IScopeDocument } from "@interfaces/scope.interface";
 import { incrementSequenceId } from "@utils/sequentialIdGenerator.util";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@services/cloudinaryUpload.service";
 import { findSuperAdmin } from "@modules/auth/auth.service";
 import { sendScopeApprovalRequestEmail } from "@services/mail/templates/sendScopeApprovalRequestEmail";
+import Scope from "@models/Scopes.model";
 
 export const createScope = async (data: Partial<IScope>) => {
   const scope = new Scope(data);
@@ -103,4 +104,3 @@ export const softDeleteScope = async (id: string) => {
     { new: true }
   );
 };
- */

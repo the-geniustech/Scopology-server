@@ -1,5 +1,4 @@
-/* import { Request, Response } from "express";
-import Scope from "../../../../models/Scope.model";
+import { Request, Response } from "express";
 import * as ScopeService from "./scope.service";
 import * as ClientService from "../clients/clients.service";
 import { catchAsync } from "@utils/catchAsync";
@@ -21,6 +20,7 @@ import {
 } from "@services/mail/templates/sendScopeApprovalEmail";
 import { resendScopeApprovalRequestEmail } from "@services/mail/templates/sendScopeApprovalRequestEmail";
 import { search } from "@utils/search.util";
+import Scope from "@models/Scopes.model";
 
 export const createScope = catchAsync(async (req: Request, res: Response) => {
   const { id: userId } = req.user || {};
@@ -323,4 +323,3 @@ export const deleteScope = catchAsync(async (req: Request, res: Response) => {
     data: deletedScope,
   });
 });
- */
