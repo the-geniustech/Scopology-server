@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env NODE_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
+    "prepare": "npx tsc --project tsconfig.json",
     "build": "tsc",
     "start": "node dist/server.js"
   },
@@ -53,5 +54,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

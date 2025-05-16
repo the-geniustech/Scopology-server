@@ -10,7 +10,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "types": ["node", "express"],
-    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "typeRoots": ["src/types", "node_modules/@types"],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "baseUrl": "./src",
