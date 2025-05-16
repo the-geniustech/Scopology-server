@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env NODE_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
-    "build": "tsc",
-    "start": "nodemon -r tsconfig-paths/register src/server.ts"
+    "build": "tsc && tsc-alias",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
