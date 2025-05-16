@@ -9,7 +9,7 @@ router.use(protect);
 
 router
   .route("/")
-  .post(projectControllers.createProject)
+  // .post(projectControllers.createProject)
   .get(projectControllers.getAllProjects);
 
 router.get("/search", projectControllers.searchProjects);

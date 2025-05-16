@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as projectService from "./projects.service";
-import { getScopeById } from "../scope/scope.service";
+// import { getScopeById } from "../scope/scope.service";
 import { catchAsync } from "@utils/catchAsync";
 import { validateData } from "@middlewares/validate.middleware";
 import { createProjectSchema } from "./projects.validator";
@@ -12,61 +12,61 @@ import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
 
-export const createProject = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
+// export const createProject = catchAsync(async (req: Request, res: Response) => {
+//   const user = req.user;
+//   if (!user) {
+//     throw new AppError("User not found", 404);
+//   }
 
-  const scope = await getScopeById(req.body.scopeId);
-  if (!scope || scope.deletedAt || !scope.client) {
-    throw new AppError("Scope or Client could not be found", 404);
-  }
+//   const scope = await getScopeById(req.body.scopeId);
+//   if (!scope || scope.deletedAt || !scope.client) {
+//     throw new AppError("Scope or Client could not be found", 404);
+//   }
 
-  if (
-    !scope.client ||
-    typeof scope.client !== "object" ||
-    !("clientNature" in scope.client) ||
-    !("clientName" in scope.client) ||
-    !("_id" in scope.client)
-  ) {
-    throw new AppError("Invalid client data in scope", 500);
-  }
+//   if (
+//     !scope.client ||
+//     typeof scope.client !== "object" ||
+//     !("clientNature" in scope.client) ||
+//     !("clientName" in scope.client) ||
+//     !("_id" in scope.client)
+//   ) {
+//     throw new AppError("Invalid client data in scope", 500);
+//   }
 
-  const client = scope.client as {
-    _id: string;
-    clientName: string;
-    clientNature: string;
-  };
+//   const client = scope.client as {
+//     _id: string;
+//     clientName: string;
+//     clientNature: string;
+//   };
 
-  const projectId = await projectService.generateNextProjectId(
-    getInitials(scope.scopeTitle)
-  );
+//   const projectId = await projectService.generateNextProjectId(
+//     getInitials(scope.scopeTitle)
+//   );
 
-  const payload = validateData(createProjectSchema, {
-    ...req.body,
-    projectId,
-    title: scope.scopeTitle,
-    type: client.clientNature,
-    category: scope.natureOfWork,
-    client: client._id.toString(),
-    clientName: client.clientName,
-    scope: scope.id,
-    createdBy: user.id,
-  });
+//   const payload = validateData(createProjectSchema, {
+//     ...req.body,
+//     projectId,
+//     title: scope.scopeTitle,
+//     type: client.clientNature,
+//     category: scope.natureOfWork,
+//     client: client._id.toString(),
+//     clientName: client.clientName,
+//     scope: scope.id,
+//     createdBy: user.id,
+//   });
 
-  const project = await projectService.createProject(
-    payload as Partial<IProject>,
-    user
-  );
+//   const project = await projectService.createProject(
+//     payload as Partial<IProject>,
+//     user
+//   );
 
-  return sendSuccess({
-    res,
-    statusCode: 201,
-    message: "Project created successfully",
-    data: { project },
-  });
-});
+//   return sendSuccess({
+//     res,
+//     statusCode: 201,
+//     message: "Project created successfully",
+//     data: { project },
+//   });
+// });
 
 export const getProject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
