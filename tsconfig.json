@@ -12,7 +12,6 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "types": ["node", "express"],
-    "typeRoots": ["./src/types", "./node_modules/@types"],
     "baseUrl": "./src",
     "paths": {
       "@config/*": ["config/*"],

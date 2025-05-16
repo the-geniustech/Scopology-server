@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env NODE_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
-    "start": "nodemon -r tsconfig-paths/register src/server.ts"
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -47,7 +47,7 @@
     "@types/morgan": "^1.9.9",
     "@types/ms": "^2.1.0",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.15.18",
+    "@types/node": "^22.14.1",
     "@types/nodemailer": "^6.4.17",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.9",
