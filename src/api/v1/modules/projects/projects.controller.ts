@@ -12,7 +12,7 @@ import { AdvancedAPIFeatures, APIFeatures } from "@utils/apiFeatures.util";
 import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
-import ProjectCopy from "@models/Scopes.model";
+import ProjectCopy from "@models/Scope.model";
 
 console.log("Scope model is working!", ProjectCopy);
 

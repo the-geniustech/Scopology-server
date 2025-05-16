@@ -1,46 +1,41 @@
 import { Schema, model } from "mongoose";
-import { IScopeDocument } from "@interfaces/scope.interface";
+import { IProjectDocument } from "@interfaces/project.interface";
 
-const scopeSchema = new Schema<IScopeDocument>(
+const scopeSchema = new Schema<IProjectDocument>(
   {
+    projectId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    title: { type: String, required: true },
+    type: { type: String, required: true },
+    category: { type: String, required: true },
+    clientName: { type: String, required: true },
     client: {
       type: Schema.Types.ObjectId,
       ref: "Client",
       required: true,
     },
-    scopeTitle: {
-      type: String,
+    scope: {
+      type: Schema.Types.ObjectId,
+      ref: "Scope",
       required: true,
     },
-    scopeOverview: {
-      type: String,
-      required: true,
+    quotation: {
+      type: Schema.Types.ObjectId,
+      ref: "Quotation",
     },
-    scopeId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    entryRequirements: {
-      type: [String],
-      default: [],
-    },
-    natureOfWork: {
-      type: String,
-      required: true,
-    },
-    isUploadedScopes: {
-      type: Boolean,
-      default: false,
-    },
-    uploadedScopes: {
-      type: [Object],
-      validate: {
-        validator(v: Object[]) {
-          return this.isUploadedScopes ? v.length > 0 : true;
-        },
-        message: (props: any) => `${props.path} must have at least one item.`,
+    siteVisits: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "SiteVisit",
       },
+    ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     progress: {
       type: Number,
@@ -49,30 +44,24 @@ const scopeSchema = new Schema<IScopeDocument>(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ["active", "completed", "paused", "cancelled"],
+      default: "active",
     },
-    rejectionReason: {
-      type: String,
-      default: null,
-    },
-    rejectionMessage: {
-      type: String,
-      default: null,
-    },
-    source: {
-      type: String,
-      enum: ["manual", "client_upload", "AI"],
-      default: "manual",
-    },
-    addedBy: {
+    // startDate: {
+    //   type: Date,
+    //   required: true,
+    // },
+    // expectedCompletionDate: Date,
+    deletedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     deletedAt: {
       type: Date,
-      default: null,
+    },
+    isArchived: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -81,5 +70,5 @@ const scopeSchema = new Schema<IScopeDocument>(
   }
 );
 
-const Scope = model<IScopeDocument>("Scope", scopeSchema);
-export default Scope;
+const ProjectCopy = model<IProjectDocument>("Scope", scopeSchema);
+export default ProjectCopy;
