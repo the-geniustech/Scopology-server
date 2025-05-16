@@ -21,10 +21,9 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "types": ["node", "express"],
-    "typeRoots": ["./src/types", "./node_modules/@types"],
     "sourceMap": true,
     "moduleResolution": "node"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

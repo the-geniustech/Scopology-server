@@ -1,5 +1,5 @@
-import { ISiteVisit } from "@interfaces/siteVisit.interface";
 import mongoose, { Schema, Document } from "mongoose";
+import { ISiteVisit } from "@interfaces/siteVisit.interface";
 
 const siteVisitSchema = new Schema<ISiteVisit>(
   {
