@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import Scope from "../../../../models/Scope.model";
 import * as ScopeService from "./scope.service";
 import * as ClientService from "../clients/clients.service";
 import { catchAsync } from "@utils/catchAsync";
@@ -12,7 +13,6 @@ import { ScopeStatus } from "@constants/scope";
 import { createScopeSchema } from "./scope.validator";
 import { getInitials } from "@utils/getInitials.util";
 import { APIFeatures } from "@utils/apiFeatures.util";
-import Scope from "@models/Scope.model";
 import { IScope } from "@interfaces/scope.interface";
 import { sendScopeRejectionEmail } from "@services/mail/templates/sendScopeRejectionEmail";
 import {
