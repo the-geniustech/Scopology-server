@@ -1,4 +1,4 @@
-import { Router } from "express";
+/* import { Router } from "express";
 import * as ScopeController from "./scope.controller";
 import { protect } from "@middlewares/auth.middleware";
 import { validateRejectScope, validateUpdateScope } from "./scope.validator";
@@ -38,3 +38,4 @@ router
   .patch(validateRejectScope, ScopeController.rejectScope);
 
 export default router;
+ */

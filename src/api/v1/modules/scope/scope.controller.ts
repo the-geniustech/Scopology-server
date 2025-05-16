@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+/* import { Request, Response } from "express";
 import Scope from "../../../../models/Scope.model";
 import * as ScopeService from "./scope.service";
 import * as ClientService from "../clients/clients.service";
@@ -323,3 +323,4 @@ export const deleteScope = catchAsync(async (req: Request, res: Response) => {
     data: deletedScope,
   });
 });
+ */

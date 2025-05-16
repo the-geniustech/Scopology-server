@@ -1,4 +1,4 @@
-import Scope from "@models/Scope.model";
+/* import Scope from "@models/Scope.model";
 import { IScope, IScopeDocument } from "@interfaces/scope.interface";
 import { incrementSequenceId } from "@utils/sequentialIdGenerator.util";
 import {
@@ -103,3 +103,4 @@ export const softDeleteScope = async (id: string) => {
     { new: true }
   );
 };
+ */
