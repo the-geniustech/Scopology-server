@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { IProjectDocument } from "@interfaces/project.interface";
 
-const projectSchema = new Schema<IProjectDocument>(
+const scopeSchema = new Schema<IProjectDocument>(
   {
     projectId: {
       type: String,
@@ -70,5 +70,5 @@ const projectSchema = new Schema<IProjectDocument>(
   }
 );
 
-const ProjectCopy = model<IProjectDocument>("Project", projectSchema);
+const ProjectCopy = model<IProjectDocument>("Scope", scopeSchema);
 export default ProjectCopy;
