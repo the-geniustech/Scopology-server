@@ -73,7 +73,7 @@ export const login = async (
 
   // Update last login
   user.lastLogin = new Date();
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   return user;
 };
@@ -126,7 +126,7 @@ export const createUser = async (
   data: Partial<IUserDocument>
 ): Promise<IUserDocument> => {
   const user = new User(data);
-  return await user.save();
+  return await user.save({ validateModifiedOnly: true });
 };
 
 export const acceptInvite = async (
@@ -148,7 +148,7 @@ export const acceptInvite = async (
   user.status = "active";
   user.dateJoined = new Date();
 
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   const accessToken = signToken({ id: user._id, type: "access" });
 
@@ -168,7 +168,7 @@ export const revokeInvite = async (email: string): Promise<void> => {
 
   user.status = "disabled";
   user.deletedAt = new Date();
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 };
 
 export const register = async (

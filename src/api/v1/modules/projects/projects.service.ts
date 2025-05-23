@@ -116,7 +116,7 @@ export const softDeleteProject = async (projectId: string, userId: string) => {
   project.deletedBy = new Types.ObjectId(userId);
   project.isArchived = true;
 
-  await project.save();
+  await project.save({ validateModifiedOnly: true });
   return project;
 };
 
@@ -130,6 +130,6 @@ export const restoreProject = async (projectId: string) => {
   project.deletedBy = null;
   project.isArchived = false;
 
-  await project.save();
+  await project.save({ validateModifiedOnly: true });
   return project;
 };

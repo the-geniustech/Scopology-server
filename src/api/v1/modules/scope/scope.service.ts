@@ -11,7 +11,7 @@ import Scope from "@models/Scopes.model";
 
 export const createScope = async (data: Partial<IScope>) => {
   const scope = new Scope(data);
-  return await scope.save();
+  return await scope.save({ validateModifiedOnly: true });
 };
 
 export const generateNextScopeId = async (

@@ -137,7 +137,7 @@ export const approveScope = catchAsync(async (req: Request, res: Response) => {
   scope.rejectionReason = undefined;
   scope.rejectionMessage = undefined;
 
-  await scope.save();
+  await scope.save({ validateModifiedOnly: true });
 
   if (
     !scope.client ||
@@ -192,7 +192,7 @@ export const rejectScope = catchAsync(async (req: Request, res: Response) => {
   scope.rejectionReason = reason;
   scope.rejectionMessage = message;
 
-  await scope.save();
+  await scope.save({ validateModifiedOnly: true });
 
   if (
     !scope.client ||

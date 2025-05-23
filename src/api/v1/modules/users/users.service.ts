@@ -29,7 +29,7 @@ export const createUser = async (
   data: Partial<IUserDocument>
 ): Promise<IUserDocument> => {
   const user = new User(data);
-  return await user.save();
+  return await user.save({ validateModifiedOnly: true });
 };
 
 export const getUserStats = async () => {

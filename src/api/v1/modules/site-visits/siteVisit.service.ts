@@ -25,7 +25,7 @@ export const acceptSiteVisit = async (siteVisitId: string, adminId: string) => {
   siteVisit.acceptedBy = adminId;
   siteVisit.acceptedAt = new Date();
 
-  await siteVisit.save();
+  await siteVisit.save({ validateModifiedOnly: true });
 
   return siteVisit;
 };
