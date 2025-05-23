@@ -35,7 +35,7 @@ export const revokeInviteSchema = z.object({
 });
 export const loginSchema = z.object({
   email: z.string().email("Email is required"),
-  password: z.string().min(6, "Password is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const validateLogin = validate(loginSchema);
