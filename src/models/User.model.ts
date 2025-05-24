@@ -52,6 +52,11 @@ const userSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
     dateJoined: {
       type: Date,
       default: null,

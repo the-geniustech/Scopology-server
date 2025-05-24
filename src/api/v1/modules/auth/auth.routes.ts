@@ -7,6 +7,8 @@ import {
   validateRevokeInvite,
   validateSignupSuperAdmin,
   validateLogin,
+  validateForgotPassword,
+  validateResetPassword,
 } from "./auth.validator";
 import { UserRole } from "@constants/roles";
 import { protect, restrictedTo } from "@middlewares/auth.middleware";
@@ -49,6 +51,17 @@ router.post(
   restrictedTo(UserRole.ADMINISTRATOR),
   validateRevokeInvite,
   authController.revokeInvite
+);
+
+router.post(
+  "/forgot-password",
+  validateForgotPassword,
+  authController.requestPasswordReset
+);
+router.post(
+  "/reset-password",
+  validateResetPassword,
+  authController.resetPassword
 );
 
 export default router;

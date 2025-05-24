@@ -6,6 +6,7 @@ import { sendUserInviteEmail } from "services/mail/templates/sendUserInviteEmail
 import { setAccessTokenCookie, signToken } from "@utils/token.util";
 import { env } from "@config/env";
 import AppError from "@utils/appError";
+import { sendResetPasswordEmail } from "@services/mail/templates/sendResetPasswordEmail";
 
 export const signupSuperAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -143,5 +144,47 @@ export const revokeInvite = catchAsync(async (req: Request, res: Response) => {
   return sendSuccess({
     res,
     message: "Invite revoked successfully",
+  });
+});
+
+export const requestPasswordReset = catchAsync(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    const { token, userFullName } = await AuthService.requestPasswordReset(
+      email
+    );
+
+    // Always respond success to avoid account enumeration
+    if (token) {
+      const resetLink = `${process.env.CLIENT_APP_URL}/reset-password?token=${token}`;
+
+      await sendResetPasswordEmail({
+        to: email,
+        fullName: userFullName,
+        resetLink,
+      });
+    }
+
+    return sendSuccess({
+      res,
+      message:
+        "If this email is associated with an account, a password reset link has been sent.",
+    });
+  }
+);
+
+export const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const { token, newPassword, confirmNewPassword } = req.body;
+
+  if (newPassword !== confirmNewPassword) {
+    throw new AppError("Passwords do not match", 400);
+  }
+
+  await AuthService.resetPassword(token, newPassword);
+
+  return sendSuccess({
+    res,
+    message: "Your password has been reset successfully. You can now log in.",
   });
 });

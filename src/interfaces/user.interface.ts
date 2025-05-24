@@ -11,6 +11,7 @@ export interface IUserDocument extends Document {
   roles: ("administrator" | "supervisor" | "super_admin")[];
   status: "pending" | "active" | "disabled";
   isActive: boolean;
+  active: boolean;
   dateJoined: Date | null;
   lastLogin?: Date;
   deletedAt?: Date;

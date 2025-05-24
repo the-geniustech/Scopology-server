@@ -38,9 +38,21 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const emailSchema = z.object({
+  email: z.string().email("Valid email is required"),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(10, "Invalid or missing token"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmNewPassword: z.string().min(6, "Confirmation password required"),
+});
+
 export const validateLogin = validate(loginSchema);
 export const validateSignupSuperAdmin = validate(signupSuperAdminSchema);
 export const validateRevokeInvite = validate(revokeInviteSchema);
 export const validateInviteUser = validate(inviteUserSchema);
 export const validateResendInviteUser = validate(resendSchema);
 export const validateAcceptInvite = validate(acceptInviteSchema);
+export const validateForgotPassword = validate(emailSchema);
+export const validateResetPassword = validate(resetPasswordSchema);

@@ -1,7 +1,8 @@
+import { env } from "@config/env";
+import jwt from "jsonwebtoken";
 import User from "@models/User.model";
 import { IUserDocument } from "@interfaces/user.interface";
 import AppError from "@utils/appError";
-import { env } from "@config/env";
 
 import {
   getNextSequenceIdPreview,
@@ -181,4 +182,49 @@ export const register = async (
   const token = signToken({ id: user._id, type: "access" });
 
   return { user, token };
+};
+
+export const generatePasswordResetToken = (userId: string): string => {
+  return jwt.sign({ userId, type: "password-reset" }, env.JWT_SECRET!, {
+    expiresIn: "10m",
+  });
+};
+
+export const requestPasswordReset = async (
+  email: string
+): Promise<{ token: string; userFullName: string }> => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return { token: "", userFullName: "" };
+  }
+
+  const token = generatePasswordResetToken((user._id as string).toString());
+
+  return {
+    token,
+    userFullName: user.fullName,
+  };
+};
+
+export const resetPassword = async (
+  token: string,
+  newPassword: string
+): Promise<void> => {
+  let decoded: any;
+  try {
+    decoded = jwt.verify(token, env.JWT_SECRET!);
+  } catch (err) {
+    throw new AppError("Invalid or expired reset token", 400);
+  }
+
+  if (decoded.type !== "password-reset") {
+    throw new AppError("Invalid token type for password reset", 403);
+  }
+
+  const user = await User.findById(decoded.userId).select("+password");
+  if (!user) throw new AppError("User not found", 404);
+
+  user.password = newPassword;
+  await user.save({ validateModifiedOnly: true });
 };
