@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const createScopeSchema = z.object({
   entryRequirements: z.array(z.string()).optional(),
-  natureOfWork: z.string(),
+  natureOfWork: z.array(z.string()).optional(),
   isUploadedScopes: z.boolean().optional(),
   uploadedScopes: z
     .array(
@@ -29,7 +29,7 @@ export const createScopeSchema = z.object({
 
 const updateScopeSchema = z.object({
   entryRequirements: z.array(z.string()).optional(),
-  natureOfWork: z.string().optional(),
+  natureOfWork: z.array(z.string()).optional(),
   isUploadedScopes: z.boolean().optional(),
   uploadedScopes: z.array(z.any()).optional(),
   status: z.enum(["pending", "approved", "rejected"]).optional(),

@@ -95,7 +95,7 @@ export const resendScopeApproval = catchAsync(
     await resendScopeApprovalRequestEmail({
       admin: { fullName, email },
       scopeTitle: scope.scopeTitle,
-      natureOfWork: scope.natureOfWork,
+      natureOfWork: scope.natureOfWork.join(", "),
       acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
     });
 
@@ -154,7 +154,7 @@ export const approveScope = catchAsync(async (req: Request, res: Response) => {
     clientName,
     clientEmail,
     scopeTitle: scope.scopeTitle,
-    natureOfWork: scope.natureOfWork,
+    natureOfWork: scope.natureOfWork.join(", "),
   } as ScopeApprovalEmailOptions);
 
   return sendSuccess({
@@ -211,7 +211,7 @@ export const rejectScope = catchAsync(async (req: Request, res: Response) => {
     clientEmail,
     clientName,
     scopeTitle: scope.scopeTitle,
-    natureOfWork: scope.natureOfWork,
+    natureOfWork: scope.natureOfWork.join(", "),
     rejectionReason: scope.rejectionReason!,
     rejectionMessage: scope.rejectionMessage,
   });
@@ -282,10 +282,10 @@ export const searchScopes = catchAsync(async (req: Request, res: Response) => {
   const scopes = await search({
     model: Scope,
     keyword,
-    searchFields: ["scopeTitle", "scopeId", "client.clientName"],
+    searchFields: ["scopeTitle", "scopeId", "client.clientName", "client.id"],
     populateFields: ["client"],
     selectFields:
-      "scopeTitle scopeId status createdAt client.clientName client.clientName client.clientLogo client.clientPhone client.clientEmail",
+      "scopeTitle scopeId status createdAt client.id client.clientName client.clientLogo client.clientPhone client.clientEmail",
   });
 
   return sendSuccess({

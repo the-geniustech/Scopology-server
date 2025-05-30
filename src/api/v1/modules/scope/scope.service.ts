@@ -53,7 +53,7 @@ export const notifyAdminOnScopeCreation = async (scope: IScopeDocument) => {
   await sendScopeApprovalRequestEmail({
     admin: { fullName, email },
     scopeTitle: scope.scopeTitle,
-    natureOfWork: scope.natureOfWork,
+    natureOfWork: scope.natureOfWork.join(", "),
     acceptLink: `${process.env.CLIENT_APP_URL}/accept-scope?scopeId=${scope._id}`,
   });
 };

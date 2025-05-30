@@ -1,18 +1,15 @@
 import { Request, Response } from "express";
 import * as projectService from "./projects.service";
-// import { getScopeById } from "../scope/scope.service";
 import { catchAsync } from "@utils/catchAsync";
 import { validateData } from "@middlewares/validate.middleware";
 import { createProjectSchema } from "./projects.validator";
 import { sendSuccess } from "@utils/responseHandler";
 import { IProject } from "@interfaces/project.interface";
 import { search } from "@utils/search.util";
-import { AdvancedAPIFeatures, APIFeatures } from "@utils/apiFeatures.util";
-// import Scope from "../../../../models/Scope.model";
+import { AdvancedAPIFeatures } from "@utils/apiFeatures.util";
 import Project from "@models/Project.model";
 import AppError from "@utils/appError";
 import { getInitials } from "@utils/getInitials.util";
-// import ProjectCopy from "@models/Scope.model";
 import Scope from "@models/Scopes.model";
 
 console.log("Scope model is working!", Scope);
@@ -53,7 +50,7 @@ export const createProject = catchAsync(async (req: Request, res: Response) => {
     projectId,
     title: scope.scopeTitle,
     type: client.clientNature,
-    category: scope.natureOfWork,
+    category: scope.natureOfWork.join(", "),
     client: client._id.toString(),
     clientName: client.clientName,
     scope: scope.id,

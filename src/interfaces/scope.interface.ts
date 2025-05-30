@@ -8,7 +8,7 @@ export interface IScope {
   scopeId: string;
   scopeOverview: string;
   entryRequirements: string[];
-  natureOfWork: string;
+  natureOfWork: string[];
   isUploadedScopes?: boolean;
   uploadedScopes: Object[];
   scopeTitle: string;

@@ -26,7 +26,7 @@ const scopeSchema = new Schema<IScopeDocument>(
       default: [],
     },
     natureOfWork: {
-      type: String,
+      type: [String],
       required: true,
     },
     isUploadedScopes: {
